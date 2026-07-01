@@ -16,6 +16,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedQuestionsRouteImport } from './routes/_authenticated/questions'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedAskRouteImport } from './routes/_authenticated/ask'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
@@ -55,6 +56,11 @@ const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedHistoryRoute = AuthenticatedHistoryRouteImport.update({
   id: '/history',
   path: '/history',
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/ask': typeof AuthenticatedAskRoute
   '/history': typeof AuthenticatedHistoryRoute
+  '/home': typeof AuthenticatedHomeRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/questions': typeof AuthenticatedQuestionsRoute
   '/admin/models': typeof AuthenticatedAdminModelsRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/ask': typeof AuthenticatedAskRoute
   '/history': typeof AuthenticatedHistoryRoute
+  '/home': typeof AuthenticatedHomeRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/questions': typeof AuthenticatedQuestionsRoute
   '/admin/models': typeof AuthenticatedAdminModelsRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/_authenticated/ask': typeof AuthenticatedAskRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
+  '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/questions': typeof AuthenticatedQuestionsRoute
   '/_authenticated/admin/models': typeof AuthenticatedAdminModelsRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/ask'
     | '/history'
+    | '/home'
     | '/profile'
     | '/questions'
     | '/admin/models'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/ask'
     | '/history'
+    | '/home'
     | '/profile'
     | '/questions'
     | '/admin/models'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/_authenticated/ask'
     | '/_authenticated/history'
+    | '/_authenticated/home'
     | '/_authenticated/profile'
     | '/_authenticated/questions'
     | '/_authenticated/admin/models'
@@ -214,6 +226,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/home': {
+      id: '/_authenticated/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof AuthenticatedHomeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/history': {
       id: '/_authenticated/history'
       path: '/history'
@@ -248,6 +267,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteChildren {
   AuthenticatedAskRoute: typeof AuthenticatedAskRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
+  AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedQuestionsRoute: typeof AuthenticatedQuestionsRoute
   AuthenticatedAdminModelsRoute: typeof AuthenticatedAdminModelsRoute
@@ -257,6 +277,7 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAskRoute: AuthenticatedAskRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
+  AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedQuestionsRoute: AuthenticatedQuestionsRoute,
   AuthenticatedAdminModelsRoute: AuthenticatedAdminModelsRoute,
