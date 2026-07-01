@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { setStoredAuth, type Role } from "@/lib/auth-storage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,6 +32,16 @@ function LoginPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function devLogin(role: Role) {
+    setStoredAuth({
+      token: `dev-token-${role.toLowerCase()}`,
+      role,
+      username: `dev_${role.toLowerCase()}`,
+    });
+    toast.success(`Дев најава како ${role}`);
+    navigate({ to: "/ask" });
   }
 
   return (
