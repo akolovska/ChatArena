@@ -104,6 +104,24 @@ function LoginPage() {
               Најави се
             </Button>
           </form>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-xs text-muted-foreground">Дев пристап (без backend)</span>
+              <div className="h-px flex-1 bg-border" />
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => devLogin("USER")}>
+                USER
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => devLogin("EVALUATOR")}>
+                EVALUATOR
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => devLogin("ADMIN")}>
+                ADMIN
+              </Button>
+            </div>
+          </div>
           <p className="text-sm text-muted-foreground text-center">
             Немате сметка?{" "}
             <Link to="/register" className="text-primary font-medium hover:underline">
@@ -111,6 +129,10 @@ function LoginPage() {
             </Link>
           </p>
         </div>
+      </div>
+    </div>
+  );
+}
       </div>
     </div>
   );
