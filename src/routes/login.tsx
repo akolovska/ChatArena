@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { setStoredAuth, type Role } from "@/lib/auth-storage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,6 +32,16 @@ function LoginPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function devLogin(role: Role) {
+    setStoredAuth({
+      token: `dev-token-${role.toLowerCase()}`,
+      role,
+      username: `dev_${role.toLowerCase()}`,
+    });
+    toast.success(`Дев најава како ${role}`);
+    navigate({ to: "/ask" });
   }
 
   return (
@@ -93,6 +104,24 @@ function LoginPage() {
               Најави се
             </Button>
           </form>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-xs text-muted-foreground">Дев пристап (без backend)</span>
+              <div className="h-px flex-1 bg-border" />
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => devLogin("USER")}>
+                USER
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => devLogin("EVALUATOR")}>
+                EVALUATOR
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => devLogin("ADMIN")}>
+                ADMIN
+              </Button>
+            </div>
+          </div>
           <p className="text-sm text-muted-foreground text-center">
             Немате сметка?{" "}
             <Link to="/register" className="text-primary font-medium hover:underline">
@@ -104,3 +133,4 @@ function LoginPage() {
     </div>
   );
 }
+
