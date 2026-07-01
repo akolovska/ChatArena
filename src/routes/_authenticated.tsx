@@ -1,11 +1,6 @@
 import { createFileRoute, Outlet, redirect, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
-import {
-  SidebarProvider,
-  SidebarTrigger,
-  SidebarInset,
-} from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/AppSidebar";
+import { AppTopNav } from "@/components/AppTopNav";
 import { getStoredAuth } from "@/lib/auth-storage";
 import { useAuth, hasAccess } from "@/lib/auth-context";
 import type { Role } from "@/lib/auth-storage";
@@ -46,21 +41,11 @@ function AuthLayout() {
   if (!isAuthenticated) return null;
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <AppSidebar />
-        <SidebarInset className="flex flex-col min-w-0">
-          <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur">
-            <SidebarTrigger />
-            <div className="ml-2 text-sm font-medium text-muted-foreground">
-              MK LLM Arena
-            </div>
-          </header>
-          <main className="flex-1 min-w-0">
-            <Outlet />
-          </main>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+    <div className="min-h-screen flex flex-col bg-background">
+      <AppTopNav />
+      <main className="flex-1 min-w-0">
+        <Outlet />
+      </main>
+    </div>
   );
 }
