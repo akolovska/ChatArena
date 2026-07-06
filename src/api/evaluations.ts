@@ -18,14 +18,30 @@ export interface Evaluation {
   createdAt?: string;
 }
 
-export function submitEvaluation(input: {
+export interface EvaluationInput {
   questionId: string | number;
   modelId: string | number;
   scores: EvaluationScores;
   comment: string;
   evaluatorName: string;
-}) {
+}
+
+export function submitEvaluation(input: EvaluationInput) {
   return apiFetch<Evaluation>("/evaluations", { method: "POST", body: input });
+}
+
+export function updateEvaluation(
+  id: string | number,
+  input: EvaluationInput,
+) {
+  return apiFetch<Evaluation>(`/evaluations/${id}`, {
+    method: "PUT",
+    body: input,
+  });
+}
+
+export function getEvaluation(id: string | number) {
+  return apiFetch<Evaluation>(`/evaluations/${id}`);
 }
 
 export function listEvaluations(params: { questionId?: string | number }) {
