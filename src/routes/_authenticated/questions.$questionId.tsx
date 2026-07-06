@@ -10,6 +10,7 @@ import { listQuestions } from "@/api/questions";
 import { listEvaluations, type Evaluation } from "@/api/evaluations";
 import { EvaluationPanel } from "@/components/EvaluationPanel";
 import { useAuth, hasAccess } from "@/lib/auth-context";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/questions/$questionId")({
   component: QuestionDetailPage,
@@ -19,6 +20,7 @@ function QuestionDetailPage() {
   const { questionId } = Route.useParams();
   const navigate = useNavigate();
   const { role } = useAuth();
+  const { t, lang } = useI18n();
   const canEdit = hasAccess(role, ["EVALUATOR", "ADMIN"]);
   const [editingId, setEditingId] = useState<string | number | null>(null);
 
@@ -43,7 +45,7 @@ function QuestionDetailPage() {
         onClick={() => navigate({ to: "/questions" })}
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
-        Назад кон прашања
+        {t("detail.back")}
       </Button>
 
       <Card className="p-6 space-y-4">
@@ -70,21 +72,21 @@ function QuestionDetailPage() {
                 }
               >
                 <Play className="mr-2 h-4 w-4" />
-                Тестирај прашање
+                {t("detail.test")}
               </Button>
             </div>
             <p className="text-base leading-relaxed">{question.text}</p>
           </>
         ) : (
           <p className="text-sm text-muted-foreground">
-            Прашањето не е пронајдено.
+            {t("detail.notFound")}
           </p>
         )}
       </Card>
 
       <div>
         <h2 className="text-lg font-semibold tracking-tight mb-3">
-          Евалуации ({evalQuery.data?.length ?? 0})
+          {t("detail.evaluations")} ({evalQuery.data?.length ?? 0})
         </h2>
 
         <div className="space-y-3">
@@ -95,7 +97,7 @@ function QuestionDetailPage() {
 
           {!evalQuery.isLoading && evalQuery.data?.length === 0 && (
             <Card className="p-8 text-center text-muted-foreground text-sm">
-              Сè уште нема евалуации за ова прашање.
+              {t("detail.empty")}
             </Card>
           )}
 
@@ -116,6 +118,8 @@ function QuestionDetailPage() {
                 evaluation={ev}
                 canEdit={canEdit}
                 onEdit={() => setEditingId(ev.id)}
+                locale={lang === "en" ? "en-US" : "mk-MK"}
+                t={t}
               />
             ),
           )}
@@ -129,10 +133,14 @@ function EvaluationCard({
   evaluation: ev,
   canEdit,
   onEdit,
+  locale,
+  t,
 }: {
   evaluation: Evaluation;
   canEdit: boolean;
   onEdit: () => void;
+  locale: string;
+  t: (k: string) => string;
 }) {
   return (
     <Card
@@ -144,7 +152,7 @@ function EvaluationCard({
     >
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2 flex-wrap">
-          <Badge>{ev.modelDisplayName ?? `Модел #${ev.modelId}`}</Badge>
+          <Badge>{ev.modelDisplayName ?? `#${ev.modelId}`}</Badge>
           <span className="text-sm text-muted-foreground inline-flex items-center gap-1">
             <UserIcon className="h-3 w-3" />
             <span className="font-medium text-foreground">
@@ -155,7 +163,7 @@ function EvaluationCard({
         <div className="flex items-center gap-3">
           {ev.createdAt && (
             <span className="text-xs text-muted-foreground">
-              {new Date(ev.createdAt).toLocaleString("mk-MK")}
+              {new Date(ev.createdAt).toLocaleString(locale)}
             </span>
           )}
           {canEdit && (
@@ -168,16 +176,16 @@ function EvaluationCard({
               }}
             >
               <Pencil className="mr-2 h-3.5 w-3.5" />
-              Уреди
+              {t("detail.edit")}
             </Button>
           )}
         </div>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        <ScoreCell label="Течност" value={ev.scores.fluency} />
-        <ScoreCell label="Точност" value={ev.scores.accuracy} />
-        <ScoreCell label="Релевантност" value={ev.scores.relevance} />
-        <ScoreCell label="Граматика" value={ev.scores.grammar} />
+        <ScoreCell label={t("eval.fluency")} value={ev.scores.fluency} />
+        <ScoreCell label={t("eval.accuracy")} value={ev.scores.accuracy} />
+        <ScoreCell label={t("eval.relevance")} value={ev.scores.relevance} />
+        <ScoreCell label={t("eval.grammar")} value={ev.scores.grammar} />
       </div>
       {ev.comment && (
         <p className="text-sm text-muted-foreground border-l-2 border-primary/40 pl-3">
