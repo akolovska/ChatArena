@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/questions")({
+export const Route = createFileRoute("/_authenticated/questions/")({
   component: QuestionsPage,
 });
 

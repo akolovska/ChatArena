@@ -14,11 +14,11 @@ import { Route as NotPermittedRouteImport } from './routes/not-permitted'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedQuestionsRouteImport } from './routes/_authenticated/questions'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedAskRouteImport } from './routes/_authenticated/ask'
+import { Route as AuthenticatedQuestionsIndexRouteImport } from './routes/_authenticated/questions.index'
 import { Route as AuthenticatedQuestionsQuestionIdRouteImport } from './routes/_authenticated/questions.$questionId'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
 import { Route as AuthenticatedAdminModelsRouteImport } from './routes/_authenticated/admin/models'
@@ -47,11 +47,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedQuestionsRoute = AuthenticatedQuestionsRouteImport.update({
-  id: '/questions',
-  path: '/questions',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -72,11 +67,17 @@ const AuthenticatedAskRoute = AuthenticatedAskRouteImport.update({
   path: '/ask',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedQuestionsIndexRoute =
+  AuthenticatedQuestionsIndexRouteImport.update({
+    id: '/questions/',
+    path: '/questions/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedQuestionsQuestionIdRoute =
   AuthenticatedQuestionsQuestionIdRouteImport.update({
-    id: '/$questionId',
-    path: '/$questionId',
-    getParentRoute: () => AuthenticatedQuestionsRoute,
+    id: '/questions/$questionId',
+    path: '/questions/$questionId',
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   id: '/admin/users',
@@ -99,10 +100,10 @@ export interface FileRoutesByFullPath {
   '/history': typeof AuthenticatedHistoryRoute
   '/home': typeof AuthenticatedHomeRoute
   '/profile': typeof AuthenticatedProfileRoute
-  '/questions': typeof AuthenticatedQuestionsRouteWithChildren
   '/admin/models': typeof AuthenticatedAdminModelsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/questions/$questionId': typeof AuthenticatedQuestionsQuestionIdRoute
+  '/questions/': typeof AuthenticatedQuestionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -113,10 +114,10 @@ export interface FileRoutesByTo {
   '/history': typeof AuthenticatedHistoryRoute
   '/home': typeof AuthenticatedHomeRoute
   '/profile': typeof AuthenticatedProfileRoute
-  '/questions': typeof AuthenticatedQuestionsRouteWithChildren
   '/admin/models': typeof AuthenticatedAdminModelsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/questions/$questionId': typeof AuthenticatedQuestionsQuestionIdRoute
+  '/questions': typeof AuthenticatedQuestionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -129,10 +130,10 @@ export interface FileRoutesById {
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
-  '/_authenticated/questions': typeof AuthenticatedQuestionsRouteWithChildren
   '/_authenticated/admin/models': typeof AuthenticatedAdminModelsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/questions/$questionId': typeof AuthenticatedQuestionsQuestionIdRoute
+  '/_authenticated/questions/': typeof AuthenticatedQuestionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -145,10 +146,10 @@ export interface FileRouteTypes {
     | '/history'
     | '/home'
     | '/profile'
-    | '/questions'
     | '/admin/models'
     | '/admin/users'
     | '/questions/$questionId'
+    | '/questions/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -159,10 +160,10 @@ export interface FileRouteTypes {
     | '/history'
     | '/home'
     | '/profile'
-    | '/questions'
     | '/admin/models'
     | '/admin/users'
     | '/questions/$questionId'
+    | '/questions'
   id:
     | '__root__'
     | '/'
@@ -174,10 +175,10 @@ export interface FileRouteTypes {
     | '/_authenticated/history'
     | '/_authenticated/home'
     | '/_authenticated/profile'
-    | '/_authenticated/questions'
     | '/_authenticated/admin/models'
     | '/_authenticated/admin/users'
     | '/_authenticated/questions/$questionId'
+    | '/_authenticated/questions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -225,13 +226,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/questions': {
-      id: '/_authenticated/questions'
-      path: '/questions'
-      fullPath: '/questions'
-      preLoaderRoute: typeof AuthenticatedQuestionsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
       path: '/profile'
@@ -260,12 +254,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAskRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/questions/': {
+      id: '/_authenticated/questions/'
+      path: '/questions'
+      fullPath: '/questions/'
+      preLoaderRoute: typeof AuthenticatedQuestionsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/questions/$questionId': {
       id: '/_authenticated/questions/$questionId'
-      path: '/$questionId'
+      path: '/questions/$questionId'
       fullPath: '/questions/$questionId'
       preLoaderRoute: typeof AuthenticatedQuestionsQuestionIdRouteImport
-      parentRoute: typeof AuthenticatedQuestionsRoute
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/admin/users': {
       id: '/_authenticated/admin/users'
@@ -284,29 +285,15 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthenticatedQuestionsRouteChildren {
-  AuthenticatedQuestionsQuestionIdRoute: typeof AuthenticatedQuestionsQuestionIdRoute
-}
-
-const AuthenticatedQuestionsRouteChildren: AuthenticatedQuestionsRouteChildren =
-  {
-    AuthenticatedQuestionsQuestionIdRoute:
-      AuthenticatedQuestionsQuestionIdRoute,
-  }
-
-const AuthenticatedQuestionsRouteWithChildren =
-  AuthenticatedQuestionsRoute._addFileChildren(
-    AuthenticatedQuestionsRouteChildren,
-  )
-
 interface AuthenticatedRouteChildren {
   AuthenticatedAskRoute: typeof AuthenticatedAskRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
-  AuthenticatedQuestionsRoute: typeof AuthenticatedQuestionsRouteWithChildren
   AuthenticatedAdminModelsRoute: typeof AuthenticatedAdminModelsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
+  AuthenticatedQuestionsQuestionIdRoute: typeof AuthenticatedQuestionsQuestionIdRoute
+  AuthenticatedQuestionsIndexRoute: typeof AuthenticatedQuestionsIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -314,9 +301,10 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
-  AuthenticatedQuestionsRoute: AuthenticatedQuestionsRouteWithChildren,
   AuthenticatedAdminModelsRoute: AuthenticatedAdminModelsRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
+  AuthenticatedQuestionsQuestionIdRoute: AuthenticatedQuestionsQuestionIdRoute,
+  AuthenticatedQuestionsIndexRoute: AuthenticatedQuestionsIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
