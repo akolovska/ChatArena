@@ -3,12 +3,12 @@ import {
   Home,
   MessageSquare,
   ListChecks,
-  History,
   Cpu,
   Users,
   UserCircle,
   LogOut,
   Menu,
+  Languages,
 } from "lucide-react";
 import { useState } from "react";
 import { hasAccess, useAuth } from "@/lib/auth-context";
@@ -23,31 +23,26 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
 
 interface NavItem {
-  title: string;
+  key: string;
   url: string;
   icon: React.ComponentType<{ className?: string }>;
   roles: Role[];
 }
 
 const NAV: NavItem[] = [
-  { title: "Дома", url: "/home", icon: Home, roles: ["USER", "EVALUATOR", "ADMIN"] },
-  { title: "Разговор", url: "/ask", icon: MessageSquare, roles: ["USER", "EVALUATOR", "ADMIN"] },
-  { title: "Прашања", url: "/questions", icon: ListChecks, roles: ["USER", "EVALUATOR", "ADMIN"] },
-  { title: "Историја", url: "/history", icon: History, roles: ["EVALUATOR", "ADMIN"] },
-  { title: "Модели", url: "/admin/models", icon: Cpu, roles: ["ADMIN"] },
-  { title: "Корисници", url: "/admin/users", icon: Users, roles: ["ADMIN"] },
+  { key: "nav.home", url: "/home", icon: Home, roles: ["USER", "EVALUATOR", "ADMIN"] },
+  { key: "nav.ask", url: "/ask", icon: MessageSquare, roles: ["USER", "EVALUATOR", "ADMIN"] },
+  { key: "nav.questions", url: "/questions", icon: ListChecks, roles: ["USER", "EVALUATOR", "ADMIN"] },
+  { key: "nav.models", url: "/admin/models", icon: Cpu, roles: ["ADMIN"] },
+  { key: "nav.users", url: "/admin/users", icon: Users, roles: ["ADMIN"] },
 ];
-
-const ROLE_LABEL: Record<Role, string> = {
-  USER: "Корисник",
-  EVALUATOR: "Евалуатор",
-  ADMIN: "Администратор",
-};
 
 export function AppTopNav() {
   const { auth, role, logout } = useAuth();
+  const { t, lang, setLang } = useI18n();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -81,12 +76,35 @@ export function AppTopNav() {
               )}
             >
               <item.icon className="h-4 w-4" />
-              <span>{item.title}</span>
+              <span>{t(item.key)}</span>
             </Link>
           ))}
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-1.5" aria-label={t("lang.switch")}>
+                <Languages className="h-4 w-4" />
+                <span className="text-xs font-semibold uppercase">{lang}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuLabel>{t("lang.switch")}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setLang("mk")}>
+                <span className={cn(lang === "mk" && "font-semibold")}>
+                  Македонски
+                </span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setLang("en")}>
+                <span className={cn(lang === "en" && "font-semibold")}>
+                  English
+                </span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="gap-2">
@@ -96,24 +114,24 @@ export function AppTopNav() {
                     {auth?.username ?? "—"}
                   </span>
                   <span className="text-[10px] text-muted-foreground">
-                    {role ? ROLE_LABEL[role] : ""}
+                    {role ? t(`role.${role}`) : ""}
                   </span>
                 </div>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>Сметка</DropdownMenuLabel>
+              <DropdownMenuLabel>{t("nav.account")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link to="/profile" className="flex items-center gap-2">
                   <UserCircle className="h-4 w-4" />
-                  Мој профил
+                  {t("nav.profile")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout} className="text-destructive">
                 <LogOut className="h-4 w-4 mr-2" />
-                Одјави се
+                {t("nav.logout")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -123,7 +141,7 @@ export function AppTopNav() {
             size="icon"
             className="md:hidden"
             onClick={() => setMobileOpen((o) => !o)}
-            aria-label="Мени"
+            aria-label={t("nav.menu")}
           >
             <Menu className="h-5 w-5" />
           </Button>
@@ -145,7 +163,7 @@ export function AppTopNav() {
               )}
             >
               <item.icon className="h-4 w-4" />
-              <span>{item.title}</span>
+              <span>{t(item.key)}</span>
             </Link>
           ))}
         </nav>

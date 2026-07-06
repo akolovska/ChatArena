@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Loader2, ClipboardCheck, Pencil } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { useI18n } from "@/lib/i18n";
 import {
   submitEvaluation,
   updateEvaluation,
@@ -25,11 +26,11 @@ interface Props {
   onCancel?: () => void;
 }
 
-const CRITERIA: { key: keyof EvaluationScores; label: string }[] = [
-  { key: "fluency", label: "Течност" },
-  { key: "accuracy", label: "Точност" },
-  { key: "relevance", label: "Релевантност" },
-  { key: "grammar", label: "Граматика" },
+const CRITERIA: { key: keyof EvaluationScores; labelKey: string }[] = [
+  { key: "fluency", labelKey: "eval.fluency" },
+  { key: "accuracy", labelKey: "eval.accuracy" },
+  { key: "relevance", labelKey: "eval.relevance" },
+  { key: "grammar", labelKey: "eval.grammar" },
 ];
 
 export function EvaluationPanel({
@@ -41,6 +42,7 @@ export function EvaluationPanel({
   onCancel,
 }: Props) {
   const { auth } = useAuth();
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const isEdit = !!initial;
 
@@ -72,14 +74,14 @@ export function EvaluationPanel({
     },
     onSuccess: () => {
       toast.success(
-        isEdit ? "Евалуацијата е ажурирана" : "Евалуацијата е зачувана",
+        isEdit ? t("eval.updatedToast") : t("eval.savedToast"),
       );
       queryClient.invalidateQueries({ queryKey: ["evaluations"] });
       if (!isEdit) setComment("");
       onSaved?.();
     },
     onError: (err) =>
-      toast.error(err instanceof Error ? err.message : "Грешка"),
+      toast.error(err instanceof Error ? err.message : t("ask.error")),
   });
 
   return (
@@ -91,7 +93,7 @@ export function EvaluationPanel({
           <ClipboardCheck className="h-4 w-4 text-primary" />
         )}
         <h3 className="font-semibold text-sm">
-          {isEdit ? "Уреди евалуација" : "Евалуација"} —{" "}
+          {isEdit ? t("eval.editTitle") : t("eval.title")} —{" "}
           <span className="text-muted-foreground">{modelName}</span>
         </h3>
       </div>
@@ -100,7 +102,7 @@ export function EvaluationPanel({
         {CRITERIA.map((c) => (
           <div key={c.key} className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-xs font-medium">{c.label}</Label>
+              <Label className="text-xs font-medium">{t(c.labelKey)}</Label>
               <span className="text-sm font-semibold tabular-nums">
                 {scores[c.key]} / 5
               </span>
@@ -120,21 +122,21 @@ export function EvaluationPanel({
 
       <div className="space-y-2">
         <Label htmlFor="comment" className="text-xs font-medium">
-          Коментар
+          {t("eval.comment")}
         </Label>
         <Textarea
           id="comment"
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           rows={2}
-          placeholder="Забелешки за одговорот..."
+          placeholder={t("eval.commentPh")}
           className="resize-none"
         />
       </div>
 
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="text-xs text-muted-foreground">
-          Евалуатор:{" "}
+          {t("eval.evaluator")}:{" "}
           <span className="font-medium text-foreground">{evaluatorName}</span>
         </div>
         <div className="flex gap-2">
@@ -145,7 +147,7 @@ export function EvaluationPanel({
               onClick={onCancel}
               disabled={mutation.isPending}
             >
-              Откажи
+              {t("eval.cancel")}
             </Button>
           )}
           <Button
@@ -156,7 +158,7 @@ export function EvaluationPanel({
             {mutation.isPending && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
-            {isEdit ? "Зачувај измени" : "Зачувај евалуација"}
+            {isEdit ? t("eval.saveEdit") : t("eval.save")}
           </Button>
         </div>
       </div>

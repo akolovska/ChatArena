@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/questions/")({
   component: QuestionsPage,
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/_authenticated/questions/")({
 
 function QuestionsPage() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [category, setCategory] = useState<string>("all");
   const [difficulty, setDifficulty] = useState<string>("all");
   const [search, setSearch] = useState("");
@@ -58,10 +60,10 @@ function QuestionsPage() {
     <div className="mx-auto max-w-5xl px-4 py-8 space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">
-          Банка на прашања
+          {t("questions.title")}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Прегледајте ги прашањата и одберете едно за тестирање.
+          {t("questions.subtitle")}
         </p>
       </div>
 
@@ -71,16 +73,16 @@ function QuestionsPage() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Пребарај..."
+            placeholder={t("questions.search")}
             className="pl-9"
           />
         </div>
         <Select value={category} onValueChange={setCategory}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Категорија" />
+            <SelectValue placeholder={t("questions.category")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Сите категории</SelectItem>
+            <SelectItem value="all">{t("questions.allCategories")}</SelectItem>
             {categories.map((c) => (
               <SelectItem key={c} value={c}>
                 {c}
@@ -90,10 +92,10 @@ function QuestionsPage() {
         </Select>
         <Select value={difficulty} onValueChange={setDifficulty}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Тежина" />
+            <SelectValue placeholder={t("questions.difficulty")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Сите тежини</SelectItem>
+            <SelectItem value="all">{t("questions.allDifficulties")}</SelectItem>
             {difficulties.map((d) => (
               <SelectItem key={d} value={d}>
                 {d}
@@ -110,7 +112,7 @@ function QuestionsPage() {
           ))}
         {!query.isLoading && filtered.length === 0 && (
           <Card className="p-8 text-center text-muted-foreground">
-            Нема пронајдени прашања.
+            {t("questions.empty")}
           </Card>
         )}
         {filtered.map((q) => (
@@ -147,7 +149,7 @@ function QuestionsPage() {
                   }}
                 >
                   <Play className="mr-2 h-3.5 w-3.5" />
-                  Тестирај
+                  {t("questions.test")}
                 </Button>
               </div>
             </div>
