@@ -1,19 +1,28 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Loader2, ClipboardCheck } from "lucide-react";
+import { Loader2, ClipboardCheck, Pencil } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { submitEvaluation, type EvaluationScores } from "@/api/evaluations";
+import {
+  submitEvaluation,
+  updateEvaluation,
+  type Evaluation,
+  type EvaluationScores,
+} from "@/api/evaluations";
 
 interface Props {
   questionId: string | number;
   modelId: string | number;
   modelName: string;
+  /** Provide to render in edit mode (PUT instead of POST). */
+  initial?: Evaluation;
+  onSaved?: () => void;
+  onCancel?: () => void;
 }
 
 const CRITERIA: { key: keyof EvaluationScores; label: string }[] = [
@@ -23,29 +32,51 @@ const CRITERIA: { key: keyof EvaluationScores; label: string }[] = [
   { key: "grammar", label: "Граматика" },
 ];
 
-export function EvaluationPanel({ questionId, modelId, modelName }: Props) {
+export function EvaluationPanel({
+  questionId,
+  modelId,
+  modelName,
+  initial,
+  onSaved,
+  onCancel,
+}: Props) {
   const { auth } = useAuth();
-  const [scores, setScores] = useState<EvaluationScores>({
-    fluency: 3,
-    accuracy: 3,
-    relevance: 3,
-    grammar: 3,
-  });
-  const [comment, setComment] = useState("");
-  const [evaluatorName, setEvaluatorName] = useState(auth?.username ?? "");
+  const queryClient = useQueryClient();
+  const isEdit = !!initial;
+
+  const [scores, setScores] = useState<EvaluationScores>(
+    initial?.scores ?? {
+      fluency: 3,
+      accuracy: 3,
+      relevance: 3,
+      grammar: 3,
+    },
+  );
+  const [comment, setComment] = useState(initial?.comment ?? "");
+  const [evaluatorName] = useState(
+    initial?.evaluatorName ?? auth?.username ?? "",
+  );
 
   const mutation = useMutation({
-    mutationFn: () =>
-      submitEvaluation({
+    mutationFn: () => {
+      const payload = {
         questionId,
         modelId,
         scores,
         comment,
         evaluatorName,
-      }),
+      };
+      return isEdit
+        ? updateEvaluation(initial!.id, payload)
+        : submitEvaluation(payload);
+    },
     onSuccess: () => {
-      toast.success("Евалуацијата е зачувана");
-      setComment("");
+      toast.success(
+        isEdit ? "Евалуацијата е ажурирана" : "Евалуацијата е зачувана",
+      );
+      queryClient.invalidateQueries({ queryKey: ["evaluations"] });
+      if (!isEdit) setComment("");
+      onSaved?.();
     },
     onError: (err) =>
       toast.error(err instanceof Error ? err.message : "Грешка"),
@@ -54,9 +85,14 @@ export function EvaluationPanel({ questionId, modelId, modelName }: Props) {
   return (
     <Card className="p-4 space-y-4 border-primary/20">
       <div className="flex items-center gap-2">
-        <ClipboardCheck className="h-4 w-4 text-primary" />
+        {isEdit ? (
+          <Pencil className="h-4 w-4 text-primary" />
+        ) : (
+          <ClipboardCheck className="h-4 w-4 text-primary" />
+        )}
         <h3 className="font-semibold text-sm">
-          Евалуација — <span className="text-muted-foreground">{modelName}</span>
+          {isEdit ? "Уреди евалуација" : "Евалуација"} —{" "}
+          <span className="text-muted-foreground">{modelName}</span>
         </h3>
       </div>
 
@@ -98,18 +134,31 @@ export function EvaluationPanel({ questionId, modelId, modelName }: Props) {
 
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="text-xs text-muted-foreground">
-          Евалуатор: <span className="font-medium text-foreground">{evaluatorName}</span>
+          Евалуатор:{" "}
+          <span className="font-medium text-foreground">{evaluatorName}</span>
         </div>
-        <Button
-          size="sm"
-          onClick={() => mutation.mutate()}
-          disabled={mutation.isPending}
-        >
-          {mutation.isPending && (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        <div className="flex gap-2">
+          {onCancel && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onCancel}
+              disabled={mutation.isPending}
+            >
+              Откажи
+            </Button>
           )}
-          Зачувај евалуација
-        </Button>
+          <Button
+            size="sm"
+            onClick={() => mutation.mutate()}
+            disabled={mutation.isPending}
+          >
+            {mutation.isPending && (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            {isEdit ? "Зачувај измени" : "Зачувај евалуација"}
+          </Button>
+        </div>
       </div>
     </Card>
   );

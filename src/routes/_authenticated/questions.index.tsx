@@ -13,9 +13,10 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search } from "lucide-react";
+import { Search, Play } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/_authenticated/questions")({
+export const Route = createFileRoute("/_authenticated/questions/")({
   component: QuestionsPage,
 });
 
@@ -118,20 +119,36 @@ function QuestionsPage() {
             className="p-4 hover:border-primary/40 hover:shadow-sm transition-all cursor-pointer"
             onClick={() =>
               navigate({
-                to: "/ask",
-                search: { questionId: String(q.id) },
+                to: "/questions/$questionId",
+                params: { questionId: String(q.id) },
               })
             }
           >
             <div className="flex items-start justify-between gap-4">
-              <p className="text-sm leading-relaxed">{q.text}</p>
-              <div className="flex flex-col items-end gap-1 shrink-0">
-                {q.category && (
-                  <Badge variant="secondary">{q.category}</Badge>
-                )}
-                {q.difficulty && (
-                  <Badge variant="outline">{q.difficulty}</Badge>
-                )}
+              <p className="text-sm leading-relaxed flex-1">{q.text}</p>
+              <div className="flex flex-col items-end gap-2 shrink-0">
+                <div className="flex flex-wrap gap-1 justify-end">
+                  {q.category && (
+                    <Badge variant="secondary">{q.category}</Badge>
+                  )}
+                  {q.difficulty && (
+                    <Badge variant="outline">{q.difficulty}</Badge>
+                  )}
+                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate({
+                      to: "/ask",
+                      search: { questionId: String(q.id) },
+                    });
+                  }}
+                >
+                  <Play className="mr-2 h-3.5 w-3.5" />
+                  Тестирај
+                </Button>
               </div>
             </div>
           </Card>
