@@ -1,0 +1,17 @@
+services:
+  chatarena_db:
+    image: postgres:17
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    container_name: chatarena_db
+
+volumes:
+  db-data:
+
