@@ -4,7 +4,7 @@ import mk.ukim.finki.backend.model.domain.Question;
 import mk.ukim.finki.backend.model.dto.QuestionDto;
 import mk.ukim.finki.backend.model.enums.QuestionCategory;
 import mk.ukim.finki.backend.model.enums.QuestionDifficulty;
-import mk.ukim.finki.backend.model.exceptions.ResourceNotFoundException;
+import mk.ukim.finki.backend.model.exceptions.NoQuestionsAvailableException;
 import mk.ukim.finki.backend.repository.QuestionRepository;
 import mk.ukim.finki.backend.service.IQuestionService;
 import org.springframework.stereotype.Service;
@@ -13,22 +13,14 @@ import java.util.List;
 
 @Service
 public class QuestionService implements IQuestionService {
+
     private final QuestionRepository questionRepository;
+
     public QuestionService(QuestionRepository questionRepository) {
         this.questionRepository = questionRepository;
     }
-    public QuestionDto findRandom() {
-        Question question = questionRepository.findRandomQuestion();
-        if (question == null) {
-            throw new ResourceNotFoundException("No questions available");
-        }
-        return toDto(question);
-    }
 
-    public Question getEntityOrThrow(Long id) {
-        return questionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Question not found: " + id));
-    }
+    @Override
     public List<QuestionDto> findAll(QuestionCategory category, QuestionDifficulty difficulty) {
         List<Question> questions;
 
@@ -43,6 +35,15 @@ public class QuestionService implements IQuestionService {
         }
 
         return questions.stream().map(this::toDto).toList();
+    }
+
+    @Override
+    public QuestionDto findRandom() {
+        Question question = questionRepository.findRandomQuestion();
+        if (question == null) {
+            throw new NoQuestionsAvailableException();
+        }
+        return toDto(question);
     }
 
     private QuestionDto toDto(Question q) {

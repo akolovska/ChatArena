@@ -2,15 +2,7 @@ import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import {
-  Send,
-  Shuffle,
-  Loader2,
-  Sparkles,
-  User as UserIcon,
-  Clock,
-  Columns2,
-} from "lucide-react";
+import { Send, Shuffle, Loader2, Sparkles, User as UserIcon, Columns2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -29,6 +21,7 @@ import { listQuestions, getRandomQuestion } from "@/api/questions";
 import { ask, type AskResponse } from "@/api/ask";
 import { EvaluationPanel } from "@/components/EvaluationPanel";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
 
 interface AskSearch {
   questionId?: string;
@@ -45,12 +38,13 @@ interface AnswerCell {
   loading: boolean;
   response?: AskResponse;
   error?: string;
-  questionId?: string | number;
+  questionId?: number;
   questionText?: string;
 }
 
 function AskPage() {
   const { role } = useAuth();
+  const { t } = useI18n();
   const search = useSearch({ from: "/_authenticated/ask" });
   const navigate = useNavigate();
 
@@ -59,23 +53,17 @@ function AskPage() {
     queryFn: () => listModels({ activeOnly: true }),
   });
 
-  // EXTENSION POINT: enable to unlock two-model side-by-side comparison.
-  // Wire a second <Select> and pass modelId to askOne(1).
   const [compareMode, setCompareMode] = useState(false);
 
-  const [selectedModelIds, setSelectedModelIds] = useState<
-    (string | number | undefined)[]
-  >([undefined, undefined]);
+  const [selectedModelIds, setSelectedModelIds] = useState<(number | undefined)[]>([
+    undefined,
+    undefined,
+  ]);
 
   const [questionText, setQuestionText] = useState("");
-  const [questionId, setQuestionId] = useState<string | number | undefined>(
-    undefined,
-  );
+  const [questionId, setQuestionId] = useState<number | undefined>(undefined);
 
-  const [cells, setCells] = useState<AnswerCell[]>([
-    { loading: false },
-    { loading: false },
-  ]);
+  const [cells, setCells] = useState<AnswerCell[]>([{ loading: false }, { loading: false }]);
 
   const hydratedFromSearch = useRef(false);
   useEffect(() => {
@@ -115,17 +103,17 @@ function AskPage() {
         replace: true,
       });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Грешка");
+      toast.error(err instanceof Error ? err.message : t("ask.error"));
     }
   }
 
   async function submit() {
     if (!questionText.trim()) {
-      toast.error("Внесете прашање");
+      toast.error(t("ask.needQuestion"));
       return;
     }
     if (!questionId) {
-      toast.error("Изберете прашање од листата или користете „Случајно“");
+      toast.error(t("ask.pickQuestion"));
       return;
     }
     const targets = compareMode
@@ -133,15 +121,13 @@ function AskPage() {
       : [selectedModelIds[0]];
 
     if (targets.some((m) => !m)) {
-      toast.error("Изберете модел");
+      toast.error(t("ask.pickModel"));
       return;
     }
 
     setCells((prev) =>
       prev.map((c, i) =>
-        i < targets.length
-          ? { loading: true, questionId, questionText }
-          : { loading: false },
+        i < targets.length ? { loading: true, questionId, questionText } : { loading: false },
       ),
     );
 
@@ -160,7 +146,7 @@ function AskPage() {
             return next;
           });
         } catch (err) {
-          const msg = err instanceof Error ? err.message : "Грешка";
+          const msg = err instanceof Error ? err.message : t("ask.error");
           setCells((prev) => {
             const next = [...prev];
             next[i] = { loading: false, error: msg, questionId, questionText };
@@ -171,18 +157,14 @@ function AskPage() {
     );
   }
 
-  const canEvaluate = hasAccess(role, ["EVALUATOR", "ADMIN"]);
+  const canEvaluate = hasAccess(role, ["ROLE_EVALUATOR", "ROLE_ADMIN"]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Разговор со модел
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Изберете модел, поставете прашање на македонски и добијте одговор.
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("ask.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t("ask.subtitle")}</p>
         </div>
         <Button
           variant={compareMode ? "default" : "outline"}
@@ -190,21 +172,16 @@ function AskPage() {
           onClick={() => setCompareMode((v) => !v)}
         >
           <Columns2 className="mr-2 h-4 w-4" />
-          {compareMode ? "Единечен режим" : "Спореди 2 модели"}
+          {compareMode ? t("ask.compareOff") : t("ask.compareDesc")}
         </Button>
       </div>
 
       <Card className="p-4 space-y-4">
-        <div
-          className={cn(
-            "grid gap-4",
-            compareMode ? "md:grid-cols-2" : "md:grid-cols-1",
-          )}
-        >
+        <div className={cn("grid gap-4", compareMode ? "md:grid-cols-2" : "md:grid-cols-1")}>
           {(compareMode ? [0, 1] : [0]).map((i) => (
             <ModelPicker
               key={i}
-              label={compareMode ? `Модел ${i + 1}` : "Модел"}
+              label={compareMode ? `${t("ask.modelN")} ${i + 1}` : t("ask.model")}
               models={activeModels}
               loading={modelsQuery.isLoading}
               value={selectedModelIds[i]}
@@ -221,27 +198,21 @@ function AskPage() {
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">Прашање</label>
+            <label className="text-sm font-medium">{t("ask.question")}</label>
             <Button variant="ghost" size="sm" onClick={loadRandom}>
               <Shuffle className="mr-2 h-4 w-4" />
-              Случајно
+              {t("ask.random")}
             </Button>
           </div>
           <Textarea
             value={questionText}
             onChange={(e) => setQuestionText(e.target.value)}
-            placeholder="Напишете прашање на македонски..."
+            placeholder={t("ask.questionPh")}
             rows={3}
             className="resize-none"
           />
           {!questionId && questionText && (
-            <p className="text-xs text-muted-foreground">
-              Совет: изберете прашање од{" "}
-              <a href="/questions" className="underline">
-                банката на прашања
-              </a>{" "}
-              за да може одговорот да се евалуира.
-            </p>
+            <p className="text-xs text-muted-foreground">{t("ask.pickQuestion")}</p>
           )}
         </div>
 
@@ -252,18 +223,13 @@ function AskPage() {
             ) : (
               <Send className="mr-2 h-4 w-4" />
             )}
-            Испрати
+            {t("ask.send")}
           </Button>
         </div>
       </Card>
 
       {(cells[0].loading || cells[0].response || cells[0].error) && (
-        <div
-          className={cn(
-            "grid gap-6",
-            compareMode ? "md:grid-cols-2" : "md:grid-cols-1",
-          )}
-        >
+        <div className={cn("grid gap-6", compareMode ? "md:grid-cols-2" : "md:grid-cols-1")}>
           {(compareMode ? [0, 1] : [0]).map((i) => (
             <div key={i} className="space-y-4">
               <ChatBubbles cell={cells[i]} />
@@ -292,21 +258,20 @@ function ModelPicker({
   label: string;
   models: LlmModel[];
   loading: boolean;
-  value: string | number | undefined;
-  onChange: (v: string) => void;
+  value: number | undefined;
+  onChange: (v: number) => void;
 }) {
+  const { t } = useI18n();
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium">{label}</label>
       <Select
         value={value != null ? String(value) : undefined}
-        onValueChange={onChange}
+        onValueChange={(v) => onChange(Number(v))}
         disabled={loading}
       >
         <SelectTrigger className="w-full">
-          <SelectValue
-            placeholder={loading ? "Се вчитуваат модели..." : "Изберете модел"}
-          />
+          <SelectValue placeholder={loading ? t("ask.loadingModels") : t("ask.selectModel")} />
         </SelectTrigger>
         <SelectContent>
           {models.map((m) => (
@@ -315,9 +280,7 @@ function ModelPicker({
             </SelectItem>
           ))}
           {models.length === 0 && !loading && (
-            <div className="px-2 py-2 text-sm text-muted-foreground">
-              Нема активни модели
-            </div>
+            <div className="px-2 py-2 text-sm text-muted-foreground">{t("ask.noModels")}</div>
           )}
         </SelectContent>
       </Select>
@@ -358,10 +321,6 @@ function ChatBubbles({ cell }: { cell: AnswerCell }) {
                 <Badge variant="secondary" className="font-medium">
                   {cell.response.displayName}
                 </Badge>
-                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  {cell.response.responseTimeMs} ms
-                </span>
               </div>
               <p className="text-sm leading-relaxed whitespace-pre-wrap">
                 {cell.response.answerText}

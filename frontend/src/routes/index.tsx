@@ -8,4 +8,3 @@ export const Route = createFileRoute("/")({
     throw redirect({ to: "/login" });
   },
 });
-

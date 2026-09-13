@@ -8,9 +8,9 @@ export interface EvaluationScores {
 }
 
 export interface Evaluation {
-  id: string | number;
-  questionId: string | number;
-  modelId: string | number;
+  id: number;
+  questionId: number;
+  modelId: number;
   modelDisplayName?: string;
   scores: EvaluationScores;
   comment: string;
@@ -19,8 +19,8 @@ export interface Evaluation {
 }
 
 export interface EvaluationInput {
-  questionId: string | number;
-  modelId: string | number;
+  questionId: number;
+  modelId: number;
   scores: EvaluationScores;
   comment: string;
   evaluatorName: string;
@@ -30,24 +30,20 @@ export function submitEvaluation(input: EvaluationInput) {
   return apiFetch<Evaluation>("/evaluations", { method: "POST", body: input });
 }
 
-export function updateEvaluation(
-  id: string | number,
-  input: EvaluationInput,
-) {
+export function updateEvaluation(id: number, input: EvaluationInput) {
   return apiFetch<Evaluation>(`/evaluations/${id}`, {
     method: "PUT",
     body: input,
   });
 }
 
-export function getEvaluation(id: string | number) {
+export function getEvaluation(id: number) {
   return apiFetch<Evaluation>(`/evaluations/${id}`);
 }
 
-export function listEvaluations(params: { questionId?: string | number }) {
+export function listEvaluations(params: { questionId?: number }) {
   const search = new URLSearchParams();
-  if (params.questionId != null)
-    search.set("questionId", String(params.questionId));
+  if (params.questionId != null) search.set("questionId", String(params.questionId));
   const qs = search.toString();
   return apiFetch<Evaluation[]>(`/evaluations${qs ? `?${qs}` : ""}`);
 }

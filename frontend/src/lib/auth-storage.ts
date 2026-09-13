@@ -1,4 +1,4 @@
-export type Role = "USER" | "EVALUATOR" | "ADMIN";
+export type Role = "ROLE_USER" | "ROLE_EVALUATOR" | "ROLE_ADMIN";
 
 export interface StoredAuth {
   token: string;

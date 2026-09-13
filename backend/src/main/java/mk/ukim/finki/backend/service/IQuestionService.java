@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface IQuestionService {
     List<QuestionDto> findAll(QuestionCategory category, QuestionDifficulty difficulty);
+    QuestionDto findRandom();
 }

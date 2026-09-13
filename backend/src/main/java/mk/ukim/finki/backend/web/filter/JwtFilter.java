@@ -6,16 +6,16 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Optional;
 
 import mk.ukim.finki.backend.constants.JwtConstants;
 import mk.ukim.finki.backend.helpers.JwtHelper;
-import mk.ukim.finki.backend.model.domain.User;
 import mk.ukim.finki.backend.service.IUserService;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -55,17 +55,19 @@ public class JwtFilter extends OncePerRequestFilter {
                 return;
             }
 
-            Optional<User> user = userService.findByUsername(username);
-            if (user.isEmpty()) {
+            UserDetails userDetails;
+            try {
+                userDetails = userService.loadUserByUsername(username);
+            } catch (UsernameNotFoundException e) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
             if (!jwtHelper.isExpired(token)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        user.get(),
+                        userDetails,
                         null,
-                        user.get().getAuthorities()
+                        userDetails.getAuthorities()
                 );
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);

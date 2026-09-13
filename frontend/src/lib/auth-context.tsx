@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   clearAuth,
   getStoredAuth,
@@ -14,13 +7,14 @@ import {
   type StoredAuth,
 } from "./auth-storage";
 import * as authApi from "@/api/auth";
+import type { RegisterInput } from "@/api/auth";
 
 interface AuthContextValue {
   auth: StoredAuth | null;
   isAuthenticated: boolean;
   role: Role | null;
   login: (username: string, password: string) => Promise<StoredAuth>;
-  register: (username: string, email: string, password: string) => Promise<void>;
+  register: (input: RegisterInput) => Promise<void>;
   logout: () => void;
   updateAuth: (patch: Partial<StoredAuth>) => void;
 }
@@ -55,8 +49,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setStoredAuth(stored);
         return stored;
       },
-      async register(username, email, password) {
-        await authApi.register(username, email, password);
+      async register(input) {
+        await authApi.register(input);
       },
       logout() {
         clearAuth();

@@ -4,6 +4,7 @@ import mk.ukim.finki.backend.model.domain.User;
 import mk.ukim.finki.backend.model.enums.Role;
 
 public record RegisterUserResponseDto(
+        Long id,
         String username,
         String name,
         String surname,
@@ -12,6 +13,7 @@ public record RegisterUserResponseDto(
 ) {
     public static RegisterUserResponseDto from(User user) {
         return new RegisterUserResponseDto(
+                user.getId(),
                 user.getUsername(),
                 user.getName(),
                 user.getSurname(),

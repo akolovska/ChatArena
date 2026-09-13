@@ -2,6 +2,7 @@ package mk.ukim.finki.backend.web.controller;
 
 import mk.ukim.finki.backend.model.dto.LlmModelDto;
 import mk.ukim.finki.backend.service.IModelService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,15 +19,17 @@ public class ModelController {
     }
 
     @GetMapping
-    public List<LlmModelDto> findAll() { return modelService.findAll(); }
+    public ResponseEntity<List<LlmModelDto>> findAll() {
+        return ResponseEntity.ok(modelService.findAll()); }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public LlmModelDto create(@RequestBody LlmModelDto dto) { return modelService.create(dto); }
+    public ResponseEntity<LlmModelDto> create(@RequestBody LlmModelDto dto) {
+        return ResponseEntity.ok(modelService.create(dto)); }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public LlmModelDto update(@PathVariable Long id, @RequestBody LlmModelDto dto) {
-        return modelService.update(id, dto);
+    public ResponseEntity<LlmModelDto> update(@PathVariable Long id, @RequestBody LlmModelDto dto) {
+        return ResponseEntity.ok(modelService.update(id, dto));
     }
 }

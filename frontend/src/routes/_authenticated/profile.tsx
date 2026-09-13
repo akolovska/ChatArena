@@ -40,8 +40,7 @@ function ProfilePage() {
       toast.success("Профилот е ажуриран");
       updateAuth({ username: u.username });
     },
-    onError: (err) =>
-      toast.error(err instanceof Error ? err.message : "Грешка"),
+    onError: (err) => toast.error(err instanceof Error ? err.message : "Грешка"),
   });
 
   const passwordMutation = useMutation({
@@ -51,8 +50,7 @@ function ProfilePage() {
       setCurrentPassword("");
       setNewPassword("");
     },
-    onError: (err) =>
-      toast.error(err instanceof Error ? err.message : "Грешка"),
+    onError: (err) => toast.error(err instanceof Error ? err.message : "Грешка"),
   });
 
   function onSaveProfile(e: FormEvent) {
@@ -84,11 +82,7 @@ function ProfilePage() {
           <form onSubmit={onSaveProfile} className="space-y-4">
             <div className="space-y-2">
               <Label>Корисничко име</Label>
-              <Input
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
+              <Input value={username} onChange={(e) => setUsername(e.target.value)} required />
             </div>
             <div className="space-y-2">
               <Label>Е-пошта</Label>
@@ -101,9 +95,7 @@ function ProfilePage() {
             </div>
             <div className="flex justify-end">
               <Button type="submit" disabled={profileMutation.isPending}>
-                {profileMutation.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
+                {profileMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Зачувај
               </Button>
             </div>
@@ -138,9 +130,7 @@ function ProfilePage() {
           </div>
           <div className="flex justify-end">
             <Button type="submit" disabled={passwordMutation.isPending}>
-              {passwordMutation.isPending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
+              {passwordMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Промени лозинка
             </Button>
           </div>

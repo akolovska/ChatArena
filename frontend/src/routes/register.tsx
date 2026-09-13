@@ -12,8 +12,10 @@ export const Route = createFileRoute("/register")({
 });
 
 function RegisterPage() {
-  const { register, login } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
+  const [name, setName] = useState("");
+  const [surname, setSurname] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,14 +25,9 @@ function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await register(username, email, password);
-      toast.success("Сметката е креирана");
-      try {
-        await login(username, password);
-        navigate({ to: "/ask" });
-      } catch {
-        navigate({ to: "/login" });
-      }
+      await register({ name, surname, email, username, password });
+      toast.success("Сметката е креирана — најавете се");
+      navigate({ to: "/login" });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Неуспешна регистрација";
       toast.error(msg);
@@ -49,14 +46,25 @@ function RegisterPage() {
             </div>
             <span className="font-semibold">MK LLM Arena</span>
           </div>
-          <h2 className="text-2xl font-semibold tracking-tight">
-            Креирај сметка
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Пополнете ги полињата подолу
-          </p>
+          <h2 className="text-2xl font-semibold tracking-tight">Креирај сметка</h2>
+          <p className="text-sm text-muted-foreground mt-1">Пополнете ги полињата подолу</p>
         </div>
         <form onSubmit={onSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="name">Име</Label>
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="surname">Презиме</Label>
+              <Input
+                id="surname"
+                value={surname}
+                onChange={(e) => setSurname(e.target.value)}
+                required
+              />
+            </div>
+          </div>
           <div className="space-y-2">
             <Label htmlFor="username">Корисничко име</Label>
             <Input

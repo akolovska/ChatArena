@@ -17,8 +17,8 @@ import {
 } from "@/api/evaluations";
 
 interface Props {
-  questionId: string | number;
-  modelId: string | number;
+  questionId: number;
+  modelId: number;
   modelName: string;
   /** Provide to render in edit mode (PUT instead of POST). */
   initial?: Evaluation;
@@ -55,9 +55,7 @@ export function EvaluationPanel({
     },
   );
   const [comment, setComment] = useState(initial?.comment ?? "");
-  const [evaluatorName] = useState(
-    initial?.evaluatorName ?? auth?.username ?? "",
-  );
+  const [evaluatorName] = useState(initial?.evaluatorName ?? auth?.username ?? "");
 
   const mutation = useMutation({
     mutationFn: () => {
@@ -68,20 +66,15 @@ export function EvaluationPanel({
         comment,
         evaluatorName,
       };
-      return isEdit
-        ? updateEvaluation(initial!.id, payload)
-        : submitEvaluation(payload);
+      return isEdit ? updateEvaluation(initial!.id, payload) : submitEvaluation(payload);
     },
     onSuccess: () => {
-      toast.success(
-        isEdit ? t("eval.updatedToast") : t("eval.savedToast"),
-      );
+      toast.success(isEdit ? t("eval.updatedToast") : t("eval.savedToast"));
       queryClient.invalidateQueries({ queryKey: ["evaluations"] });
       if (!isEdit) setComment("");
       onSaved?.();
     },
-    onError: (err) =>
-      toast.error(err instanceof Error ? err.message : t("ask.error")),
+    onError: (err) => toast.error(err instanceof Error ? err.message : t("ask.error")),
   });
 
   return (
@@ -103,18 +96,14 @@ export function EvaluationPanel({
           <div key={c.key} className="space-y-2">
             <div className="flex items-center justify-between">
               <Label className="text-xs font-medium">{t(c.labelKey)}</Label>
-              <span className="text-sm font-semibold tabular-nums">
-                {scores[c.key]} / 5
-              </span>
+              <span className="text-sm font-semibold tabular-nums">{scores[c.key]} / 5</span>
             </div>
             <Slider
               min={1}
               max={5}
               step={1}
               value={[scores[c.key]]}
-              onValueChange={([v]) =>
-                setScores((s) => ({ ...s, [c.key]: v }))
-              }
+              onValueChange={([v]) => setScores((s) => ({ ...s, [c.key]: v }))}
             />
           </div>
         ))}
@@ -141,23 +130,12 @@ export function EvaluationPanel({
         </div>
         <div className="flex gap-2">
           {onCancel && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={onCancel}
-              disabled={mutation.isPending}
-            >
+            <Button size="sm" variant="outline" onClick={onCancel} disabled={mutation.isPending}>
               {t("eval.cancel")}
             </Button>
           )}
-          <Button
-            size="sm"
-            onClick={() => mutation.mutate()}
-            disabled={mutation.isPending}
-          >
-            {mutation.isPending && (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            )}
+          <Button size="sm" onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+            {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isEdit ? t("eval.saveEdit") : t("eval.save")}
           </Button>
         </div>

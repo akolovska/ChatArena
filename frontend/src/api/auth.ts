@@ -7,30 +7,40 @@ export interface LoginResponse {
 }
 
 export function login(username: string, password: string) {
-  return apiFetch<LoginResponse>("/auth/login", {
+  return apiFetch<LoginResponse>("/user/login", {
     method: "POST",
     body: { username, password },
     auth: false,
   });
 }
 
-export function register(username: string, email: string, password: string) {
-  return apiFetch<void>("/auth/register", {
+export interface RegisterInput {
+  name: string;
+  surname: string;
+  email: string;
+  username: string;
+  password: string;
+}
+
+export function register(input: RegisterInput) {
+  return apiFetch<void>("/user/register", {
     method: "POST",
-    body: { username, email, password },
+    body: input,
     auth: false,
   });
 }
 
 export interface UserProfile {
-  id: string | number;
+  id: number;
+  name: string;
+  surname: string;
   username: string;
   email: string;
   role: Role;
 }
 
 export function getMe() {
-  return apiFetch<UserProfile>("/auth/me");
+  return apiFetch<UserProfile>("/user/me");
 }
 
 export function updateMe(patch: {
@@ -39,7 +49,7 @@ export function updateMe(patch: {
   currentPassword?: string;
   newPassword?: string;
 }) {
-  return apiFetch<UserProfile>("/auth/me", {
+  return apiFetch<UserProfile>("/user/me", {
     method: "PUT",
     body: patch,
   });

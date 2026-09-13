@@ -3,6 +3,7 @@ import {
   Home,
   MessageSquare,
   ListChecks,
+  History,
   Cpu,
   Users,
   UserCircle,
@@ -33,11 +34,32 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
-  { key: "nav.home", url: "/home", icon: Home, roles: ["USER", "EVALUATOR", "ADMIN"] },
-  { key: "nav.ask", url: "/ask", icon: MessageSquare, roles: ["USER", "EVALUATOR", "ADMIN"] },
-  { key: "nav.questions", url: "/questions", icon: ListChecks, roles: ["USER", "EVALUATOR", "ADMIN"] },
-  { key: "nav.models", url: "/admin/models", icon: Cpu, roles: ["ADMIN"] },
-  { key: "nav.users", url: "/admin/users", icon: Users, roles: ["ADMIN"] },
+  {
+    key: "nav.home",
+    url: "/home",
+    icon: Home,
+    roles: ["ROLE_USER", "ROLE_EVALUATOR", "ROLE_ADMIN"],
+  },
+  {
+    key: "nav.ask",
+    url: "/ask",
+    icon: MessageSquare,
+    roles: ["ROLE_USER", "ROLE_EVALUATOR", "ROLE_ADMIN"],
+  },
+  {
+    key: "nav.questions",
+    url: "/questions",
+    icon: ListChecks,
+    roles: ["ROLE_USER", "ROLE_EVALUATOR", "ROLE_ADMIN"],
+  },
+  {
+    key: "nav.history",
+    url: "/history",
+    icon: History,
+    roles: ["ROLE_EVALUATOR", "ROLE_ADMIN"],
+  },
+  { key: "nav.models", url: "/admin/models", icon: Cpu, roles: ["ROLE_ADMIN"] },
+  { key: "nav.users", url: "/admin/users", icon: Users, roles: ["ROLE_ADMIN"] },
 ];
 
 export function AppTopNav() {
@@ -48,8 +70,7 @@ export function AppTopNav() {
 
   const items = NAV.filter((i) => hasAccess(role, i.roles));
 
-  const isActive = (url: string) =>
-    pathname === url || pathname.startsWith(url + "/");
+  const isActive = (url: string) => pathname === url || pathname.startsWith(url + "/");
 
   return (
     <header className="sticky top-0 z-30 w-full border-b bg-background/90 backdrop-blur">
@@ -58,9 +79,7 @@ export function AppTopNav() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-semibold text-sm">
             MK
           </div>
-          <span className="hidden sm:block text-sm font-semibold tracking-tight">
-            MK LLM Arena
-          </span>
+          <span className="hidden sm:block text-sm font-semibold tracking-tight">MK LLM Arena</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-1 ml-4">
@@ -93,14 +112,10 @@ export function AppTopNav() {
               <DropdownMenuLabel>{t("lang.switch")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setLang("mk")}>
-                <span className={cn(lang === "mk" && "font-semibold")}>
-                  Македонски
-                </span>
+                <span className={cn(lang === "mk" && "font-semibold")}>Македонски</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setLang("en")}>
-                <span className={cn(lang === "en" && "font-semibold")}>
-                  English
-                </span>
+                <span className={cn(lang === "en" && "font-semibold")}>English</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -110,9 +125,7 @@ export function AppTopNav() {
               <Button variant="ghost" size="sm" className="gap-2">
                 <UserCircle className="h-5 w-5" />
                 <div className="hidden sm:flex flex-col items-start leading-tight">
-                  <span className="text-sm font-medium">
-                    {auth?.username ?? "—"}
-                  </span>
+                  <span className="text-sm font-medium">{auth?.username ?? "—"}</span>
                   <span className="text-[10px] text-muted-foreground">
                     {role ? t(`role.${role}`) : ""}
                   </span>

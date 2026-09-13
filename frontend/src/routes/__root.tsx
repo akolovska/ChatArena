@@ -20,9 +20,7 @@ function NotFoundComponent() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">
-          Страницата не е пронајдена
-        </h2>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">Страницата не е пронајдена</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Оваа страница не постои или е преместена.
         </p>
@@ -49,9 +47,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          Настана грешка
-        </h1>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">Настана грешка</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Обидете се повторно или вратете се на почетната страница.
         </p>
@@ -85,14 +81,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "MK LLM Arena — Македонска евалуација на јазични модели" },
       {
         name: "description",
-        content:
-          "Платформа за евалуација на одговори од LLM модели на македонски јазик.",
+        content: "Платформа за евалуација на одговори од LLM модели на македонски јазик.",
       },
       { property: "og:title", content: "MK LLM Arena" },
       {
         property: "og:description",
-        content:
-          "Платформа за евалуација на одговори од LLM модели на македонски јазик.",
+        content: "Платформа за евалуација на одговори од LLM модели на македонски јазик.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

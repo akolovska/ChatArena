@@ -3,6 +3,7 @@ package mk.ukim.finki.backend.web.controller;
 import mk.ukim.finki.backend.model.dto.EvaluationRequestDto;
 import mk.ukim.finki.backend.model.dto.EvaluationResponseDto;
 import mk.ukim.finki.backend.service.IEvaluationService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -21,23 +22,23 @@ public class EvaluationController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('EVALUATOR', 'ADMIN')")
-    public EvaluationResponseDto create(Authentication auth, @RequestBody EvaluationRequestDto req) {
-        return evaluationService.create(req, auth.getName());
+    public ResponseEntity<EvaluationResponseDto> create(Authentication auth, @RequestBody EvaluationRequestDto req) {
+        return ResponseEntity.ok(evaluationService.create(req, auth.getName()));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('EVALUATOR', 'ADMIN')")
-    public EvaluationResponseDto update(@PathVariable Long id, @RequestBody EvaluationRequestDto req) {
-        return evaluationService.update(id, req);
+    public ResponseEntity<EvaluationResponseDto> update(@PathVariable Long id, @RequestBody EvaluationRequestDto req) {
+        return ResponseEntity.ok(evaluationService.update(id, req));
     }
 
     @GetMapping("/{id}")
-    public EvaluationResponseDto findById(@PathVariable Long id) {
-        return evaluationService.findById(id);
+    public ResponseEntity<EvaluationResponseDto> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(evaluationService.findById(id));
     }
 
     @GetMapping
-    public List<EvaluationResponseDto> findAll(@RequestParam(required = false) Long questionId) {
-        return evaluationService.findAll(questionId);
+    public ResponseEntity<List<EvaluationResponseDto>> findAll(@RequestParam(required = false) Long questionId) {
+        return ResponseEntity.ok(evaluationService.findAll(questionId));
     }
 }

@@ -1,7 +1,7 @@
 import { apiFetch } from "./client";
 
 export interface LlmModel {
-  id: string | number;
+  id: number;
   displayName: string;
   active: boolean;
   providerType?: string;
@@ -22,9 +22,6 @@ export function createModel(input: {
   return apiFetch<LlmModel>("/models", { method: "POST", body: input });
 }
 
-export function updateModel(
-  id: string | number,
-  patch: Partial<Omit<LlmModel, "id">>,
-) {
+export function updateModel(id: number, patch: Partial<Omit<LlmModel, "id">>) {
   return apiFetch<LlmModel>(`/models/${id}`, { method: "PUT", body: patch });
 }

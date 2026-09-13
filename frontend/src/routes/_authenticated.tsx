@@ -8,8 +8,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 const ROLE_RULES: { prefix: string; roles: Role[] }[] = [
-  { prefix: "/admin", roles: ["ADMIN"] },
-  { prefix: "/history", roles: ["EVALUATOR", "ADMIN"] },
+  { prefix: "/admin", roles: ["ROLE_ADMIN"] },
+  { prefix: "/history", roles: ["ROLE_EVALUATOR", "ROLE_ADMIN"] },
 ];
 
 export const Route = createFileRoute("/_authenticated")({

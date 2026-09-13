@@ -35,19 +35,14 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Plus, Loader2 } from "lucide-react";
-
-const PROVIDERS = [
-  { value: "static-json", label: "Статички JSON" },
-  { value: "openai", label: "OpenAI" },
-  { value: "anthropic", label: "Anthropic" },
-  { value: "custom-http", label: "Custom HTTP" },
-];
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/admin/models")({
   component: ModelsAdminPage,
 });
 
 function ModelsAdminPage() {
+  const { t } = useI18n();
   const qc = useQueryClient();
   const query = useQuery({
     queryKey: ["models", "all"],
@@ -55,13 +50,11 @@ function ModelsAdminPage() {
   });
 
   const toggle = useMutation({
-    mutationFn: (m: { id: string | number; active: boolean }) =>
-      updateModel(m.id, { active: m.active }),
+    mutationFn: (m: { id: number; active: boolean }) => updateModel(m.id, { active: m.active }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["models"] });
     },
-    onError: (err) =>
-      toast.error(err instanceof Error ? err.message : "Грешка"),
+    onError: (err) => toast.error(err instanceof Error ? err.message : t("ask.error")),
   });
 
   const [open, setOpen] = useState(false);
@@ -70,18 +63,14 @@ function ModelsAdminPage() {
     <div className="mx-auto max-w-5xl px-4 py-8 space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Управување со модели
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Регистрирајте и активирајте LLM модели за платформата.
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("models.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t("models.subtitle")}</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Нов модел
+              {t("models.new")}
             </Button>
           </DialogTrigger>
           <NewModelDialog onDone={() => setOpen(false)} />
@@ -99,10 +88,10 @@ function ModelsAdminPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Име</TableHead>
-                <TableHead>Провајдер</TableHead>
-                <TableHead>Статус</TableHead>
-                <TableHead className="w-[100px]">Активен</TableHead>
+                <TableHead>{t("models.name")}</TableHead>
+                <TableHead>{t("models.provider")}</TableHead>
+                <TableHead>{t("models.status")}</TableHead>
+                <TableHead className="w-[100px]">{t("models.activeCol")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -114,28 +103,23 @@ function ModelsAdminPage() {
                   </TableCell>
                   <TableCell>
                     {m.active ? (
-                      <Badge>Активен</Badge>
+                      <Badge>{t("models.active")}</Badge>
                     ) : (
-                      <Badge variant="secondary">Неактивен</Badge>
+                      <Badge variant="secondary">{t("models.inactive")}</Badge>
                     )}
                   </TableCell>
                   <TableCell>
                     <Switch
                       checked={m.active}
-                      onCheckedChange={(v) =>
-                        toggle.mutate({ id: m.id, active: v })
-                      }
+                      onCheckedChange={(v) => toggle.mutate({ id: m.id, active: v })}
                     />
                   </TableCell>
                 </TableRow>
               ))}
               {query.data?.length === 0 && (
                 <TableRow>
-                  <TableCell
-                    colSpan={4}
-                    className="text-center text-muted-foreground py-8"
-                  >
-                    Нема регистрирани модели.
+                  <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                    {t("models.empty")}
                   </TableCell>
                 </TableRow>
               )}
@@ -148,10 +132,18 @@ function ModelsAdminPage() {
 }
 
 function NewModelDialog({ onDone }: { onDone: () => void }) {
+  const { t } = useI18n();
   const qc = useQueryClient();
   const [displayName, setDisplayName] = useState("");
   const [providerType, setProviderType] = useState("static-json");
   const [configText, setConfigText] = useState("{}");
+
+  const PROVIDERS = [
+    { value: "static-json", label: t("models.providerStatic") },
+    { value: "openai", label: t("models.providerOpenAI") },
+    { value: "anthropic", label: t("models.providerAnthropic") },
+    { value: "custom-http", label: t("models.providerCustomHttp") },
+  ];
 
   const mutation = useMutation({
     mutationFn: () => {
@@ -159,19 +151,18 @@ function NewModelDialog({ onDone }: { onDone: () => void }) {
       try {
         config = JSON.parse(configText);
       } catch {
-        throw new Error("Невалиден JSON во конфигурацијата");
+        throw new Error(t("models.invalidConfig"));
       }
       return createModel({ displayName, providerType, config });
     },
     onSuccess: () => {
-      toast.success("Моделот е креиран");
+      toast.success(t("models.created"));
       qc.invalidateQueries({ queryKey: ["models"] });
       setDisplayName("");
       setConfigText("{}");
       onDone();
     },
-    onError: (err) =>
-      toast.error(err instanceof Error ? err.message : "Грешка"),
+    onError: (err) => toast.error(err instanceof Error ? err.message : t("ask.error")),
   });
 
   function onSubmit(e: FormEvent) {
@@ -182,19 +173,15 @@ function NewModelDialog({ onDone }: { onDone: () => void }) {
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Регистрирај нов модел</DialogTitle>
+        <DialogTitle>{t("models.dialogTitle")}</DialogTitle>
       </DialogHeader>
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Label>Име за приказ</Label>
-          <Input
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            required
-          />
+          <Label>{t("models.displayName")}</Label>
+          <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} required />
         </div>
         <div className="space-y-2">
-          <Label>Провајдер</Label>
+          <Label>{t("models.provider")}</Label>
           <Select value={providerType} onValueChange={setProviderType}>
             <SelectTrigger>
               <SelectValue />
@@ -209,7 +196,7 @@ function NewModelDialog({ onDone }: { onDone: () => void }) {
           </Select>
         </div>
         <div className="space-y-2">
-          <Label>Конфигурација (JSON)</Label>
+          <Label>{t("models.config")}</Label>
           <Textarea
             value={configText}
             onChange={(e) => setConfigText(e.target.value)}
@@ -219,10 +206,8 @@ function NewModelDialog({ onDone }: { onDone: () => void }) {
         </div>
         <DialogFooter>
           <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending && (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            )}
-            Зачувај
+            {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {t("models.save")}
           </Button>
         </DialogFooter>
       </form>

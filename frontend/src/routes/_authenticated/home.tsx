@@ -1,12 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  MessageSquare,
-  ListChecks,
-  Cpu,
-  Users,
-  UserCircle,
-  ArrowRight,
-} from "lucide-react";
+import { MessageSquare, ListChecks, Cpu, Users, UserCircle, ArrowRight } from "lucide-react";
 import { hasAccess, useAuth } from "@/lib/auth-context";
 import type { Role } from "@/lib/auth-storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,35 +24,35 @@ const TILES: Tile[] = [
     descKey: "home.tile.ask.desc",
     url: "/ask",
     icon: MessageSquare,
-    roles: ["USER", "EVALUATOR", "ADMIN"],
+    roles: ["ROLE_USER", "ROLE_EVALUATOR", "ROLE_ADMIN"],
   },
   {
     titleKey: "home.tile.questions.title",
     descKey: "home.tile.questions.desc",
     url: "/questions",
     icon: ListChecks,
-    roles: ["USER", "EVALUATOR", "ADMIN"],
+    roles: ["ROLE_USER", "ROLE_EVALUATOR", "ROLE_ADMIN"],
   },
   {
     titleKey: "home.tile.models.title",
     descKey: "home.tile.models.desc",
     url: "/admin/models",
     icon: Cpu,
-    roles: ["ADMIN"],
+    roles: ["ROLE_ADMIN"],
   },
   {
     titleKey: "home.tile.users.title",
     descKey: "home.tile.users.desc",
     url: "/admin/users",
     icon: Users,
-    roles: ["ADMIN"],
+    roles: ["ROLE_ADMIN"],
   },
   {
     titleKey: "home.tile.profile.title",
     descKey: "home.tile.profile.desc",
     url: "/profile",
     icon: UserCircle,
-    roles: ["USER", "EVALUATOR", "ADMIN"],
+    roles: ["ROLE_USER", "ROLE_EVALUATOR", "ROLE_ADMIN"],
   },
 ];
 
@@ -75,11 +68,10 @@ function HomePage() {
           {t("home.badge")}
         </div>
         <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
-          {t("home.welcome")}{auth?.username ? `, ${auth.username}` : ""}
+          {t("home.welcome")}
+          {auth?.username ? `, ${auth.username}` : ""}
         </h1>
-        <p className="text-muted-foreground max-w-2xl">
-          {t("home.intro")}
-        </p>
+        <p className="text-muted-foreground max-w-2xl">{t("home.intro")}</p>
         <div className="flex flex-wrap gap-2 pt-2">
           <Button asChild>
             <Link to="/ask">

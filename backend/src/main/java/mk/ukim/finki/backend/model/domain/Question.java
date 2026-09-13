@@ -16,10 +16,12 @@ public class Question extends BaseAuditableEntity {
     @Column(nullable = false)
     private String text;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private QuestionCategory category;   // general, science, history, culture
+    private QuestionCategory category;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private QuestionDifficulty difficulty; // easy, medium, hard
+    private QuestionDifficulty difficulty;
 
 }

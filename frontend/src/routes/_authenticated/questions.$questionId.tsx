@@ -1,16 +1,35 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { ArrowLeft, Play, Star, Pencil, User as UserIcon } from "lucide-react";
+import {
+  ArrowLeft,
+  Play,
+  Star,
+  Pencil,
+  User as UserIcon,
+  Plus,
+  Loader2,
+  Sparkles,
+} from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { listQuestions } from "@/api/questions";
 import { listEvaluations, type Evaluation } from "@/api/evaluations";
+import { listModels } from "@/api/models";
+import { ask, type AskResponse } from "@/api/ask";
 import { EvaluationPanel } from "@/components/EvaluationPanel";
 import { useAuth, hasAccess } from "@/lib/auth-context";
 import { useI18n } from "@/lib/i18n";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/questions/$questionId")({
   component: QuestionDetailPage,
@@ -18,32 +37,28 @@ export const Route = createFileRoute("/_authenticated/questions/$questionId")({
 
 function QuestionDetailPage() {
   const { questionId } = Route.useParams();
+  const numericQuestionId = Number(questionId);
   const navigate = useNavigate();
   const { role } = useAuth();
   const { t, lang } = useI18n();
-  const canEdit = hasAccess(role, ["EVALUATOR", "ADMIN"]);
-  const [editingId, setEditingId] = useState<string | number | null>(null);
+  const canEdit = hasAccess(role, ["ROLE_EVALUATOR", "ROLE_ADMIN"]);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [addingNew, setAddingNew] = useState(false);
 
   const questionsQuery = useQuery({
     queryKey: ["questions", "all"],
     queryFn: () => listQuestions(),
   });
-  const question = questionsQuery.data?.find(
-    (q) => String(q.id) === String(questionId),
-  );
+  const question = questionsQuery.data?.find((q) => q.id === numericQuestionId);
 
   const evalQuery = useQuery({
-    queryKey: ["evaluations", questionId],
-    queryFn: () => listEvaluations({ questionId }),
+    queryKey: ["evaluations", numericQuestionId],
+    queryFn: () => listEvaluations({ questionId: numericQuestionId }),
   });
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 space-y-6">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => navigate({ to: "/questions" })}
-      >
+      <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/questions" })}>
         <ArrowLeft className="mr-2 h-4 w-4" />
         {t("detail.back")}
       </Button>
@@ -55,12 +70,8 @@ function QuestionDetailPage() {
           <>
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div className="flex flex-wrap gap-2">
-                {question.category && (
-                  <Badge variant="secondary">{question.category}</Badge>
-                )}
-                {question.difficulty && (
-                  <Badge variant="outline">{question.difficulty}</Badge>
-                )}
+                <Badge variant="secondary">{question.category}</Badge>
+                <Badge variant="outline">{question.difficulty}</Badge>
               </div>
               <Button
                 size="sm"
@@ -78,11 +89,27 @@ function QuestionDetailPage() {
             <p className="text-base leading-relaxed">{question.text}</p>
           </>
         ) : (
-          <p className="text-sm text-muted-foreground">
-            {t("detail.notFound")}
-          </p>
+          <p className="text-sm text-muted-foreground">{t("detail.notFound")}</p>
         )}
       </Card>
+
+      {canEdit && question && (
+        <div>
+          {!addingNew ? (
+            <Button variant="outline" size="sm" onClick={() => setAddingNew(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              {t("detail.addEvaluation")}
+            </Button>
+          ) : (
+            <AddEvaluationCard
+              questionId={question.id}
+              onDone={() => setAddingNew(false)}
+              onCancel={() => setAddingNew(false)}
+              t={t}
+            />
+          )}
+        </div>
+      )}
 
       <div>
         <h2 className="text-lg font-semibold tracking-tight mb-3">
@@ -91,9 +118,7 @@ function QuestionDetailPage() {
 
         <div className="space-y-3">
           {evalQuery.isLoading &&
-            Array.from({ length: 2 }).map((_, i) => (
-              <Skeleton key={i} className="h-32 w-full" />
-            ))}
+            Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
 
           {!evalQuery.isLoading && evalQuery.data?.length === 0 && (
             <Card className="p-8 text-center text-muted-foreground text-sm">
@@ -129,6 +154,118 @@ function QuestionDetailPage() {
   );
 }
 
+function AddEvaluationCard({
+  questionId,
+  onDone,
+  onCancel,
+  t,
+}: {
+  questionId: number;
+  onDone: () => void;
+  onCancel: () => void;
+  t: (k: string) => string;
+}) {
+  const modelsQuery = useQuery({
+    queryKey: ["models", "active"],
+    queryFn: () => listModels({ activeOnly: true }),
+  });
+
+  const [modelId, setModelId] = useState<number | undefined>(undefined);
+  const [loadingAnswer, setLoadingAnswer] = useState(false);
+  const [answer, setAnswer] = useState<AskResponse | null>(null);
+
+  async function fetchAnswer() {
+    if (!modelId) {
+      toast.error(t("ask.pickModel"));
+      return;
+    }
+    setLoadingAnswer(true);
+    setAnswer(null);
+    try {
+      const res = await ask(questionId, modelId);
+      setAnswer(res);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("ask.error"));
+    } finally {
+      setLoadingAnswer(false);
+    }
+  }
+
+  return (
+    <Card className="p-4 space-y-4 mt-3">
+      <div className="space-y-2">
+        <label className="text-sm font-medium">{t("ask.model")}</label>
+        <div className="flex gap-2">
+          <Select
+            value={modelId != null ? String(modelId) : undefined}
+            onValueChange={(v) => {
+              setModelId(Number(v));
+              setAnswer(null);
+            }}
+            disabled={modelsQuery.isLoading}
+          >
+            <SelectTrigger className="flex-1">
+              <SelectValue
+                placeholder={modelsQuery.isLoading ? t("ask.loadingModels") : t("ask.selectModel")}
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {modelsQuery.data?.map((m) => (
+                <SelectItem key={m.id} value={String(m.id)}>
+                  {m.displayName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button onClick={fetchAnswer} disabled={!modelId || loadingAnswer}>
+            {loadingAnswer && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {t("detail.getAnswer")}
+          </Button>
+        </div>
+      </div>
+
+      {loadingAnswer && (
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-4 w-full" />
+        </div>
+      )}
+
+      {answer && (
+        <div className="flex gap-3">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <Card className="max-w-[80%] p-4 space-y-2 bg-assistant-bubble text-assistant-bubble-foreground">
+            <Badge variant="secondary" className="font-medium">
+              {answer.displayName}
+            </Badge>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap">{answer.answerText}</p>
+          </Card>
+        </div>
+      )}
+
+      {answer && modelId && (
+        <EvaluationPanel
+          questionId={questionId}
+          modelId={modelId}
+          modelName={answer.displayName}
+          onSaved={onDone}
+          onCancel={onCancel}
+        />
+      )}
+
+      {!answer && (
+        <div className="flex justify-end">
+          <Button variant="ghost" size="sm" onClick={onCancel}>
+            {t("eval.cancel")}
+          </Button>
+        </div>
+      )}
+    </Card>
+  );
+}
+
 function EvaluationCard({
   evaluation: ev,
   canEdit,
@@ -155,9 +292,7 @@ function EvaluationCard({
           <Badge>{ev.modelDisplayName ?? `#${ev.modelId}`}</Badge>
           <span className="text-sm text-muted-foreground inline-flex items-center gap-1">
             <UserIcon className="h-3 w-3" />
-            <span className="font-medium text-foreground">
-              {ev.evaluatorName}
-            </span>
+            <span className="font-medium text-foreground">{ev.evaluatorName}</span>
           </span>
         </div>
         <div className="flex items-center gap-3">
@@ -202,9 +337,7 @@ function ScoreCell({ label, value }: { label: string; value: number }) {
       <div className="text-xs text-muted-foreground">{label}</div>
       <div className="flex items-center gap-1 mt-1">
         <Star className="h-3.5 w-3.5 fill-primary text-primary" />
-        <span className="text-sm font-semibold tabular-nums">
-          {value} / 5
-        </span>
+        <span className="text-sm font-semibold tabular-nums">{value} / 5</span>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import mk.ukim.finki.backend.model.dto.QuestionDto;
 import mk.ukim.finki.backend.model.enums.QuestionCategory;
 import mk.ukim.finki.backend.model.enums.QuestionDifficulty;
 import mk.ukim.finki.backend.service.IQuestionService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,15 +23,15 @@ public class QuestionController {
     }
 
     @GetMapping
-    public List<QuestionDto> findAll(
+    public ResponseEntity<List<QuestionDto>> findAll(
             @RequestParam(required = false) QuestionCategory category,
             @RequestParam(required = false) QuestionDifficulty difficulty
     ) {
-        return questionService.findAll(category, difficulty);
+        return ResponseEntity.ok(questionService.findAll(category, difficulty));
     }
 
     @GetMapping("/random")
-    public QuestionDto random() {
-        return questionService.findRandom();
+    public ResponseEntity<QuestionDto> random() {
+        return ResponseEntity.ok(questionService.findRandom());
     }
 }

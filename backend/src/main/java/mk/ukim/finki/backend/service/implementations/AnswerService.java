@@ -3,6 +3,9 @@ package mk.ukim.finki.backend.service.implementations;
 import mk.ukim.finki.backend.model.domain.LlmModel;
 import mk.ukim.finki.backend.model.domain.Question;
 import mk.ukim.finki.backend.model.dto.AskResponseDto;
+import mk.ukim.finki.backend.model.exceptions.InactiveModelException;
+import mk.ukim.finki.backend.model.exceptions.LlmModelNotFoundException;
+import mk.ukim.finki.backend.model.exceptions.QuestionNotFoundException;
 import mk.ukim.finki.backend.model.exceptions.ResourceNotFoundException;
 import mk.ukim.finki.backend.provider.StaticJsonModelProvider;
 import mk.ukim.finki.backend.repository.LlmModelRepository;
@@ -22,18 +25,20 @@ public class AnswerService implements IAnswerService {
         this.modelRepository = modelRepository;
         this.staticProvider = staticProvider;
     }
-    // later: ModelProviderRegistry that picks provider by model.getProviderType()
 
+    @Override
     public AskResponseDto getAnswer(Long questionId, Long modelId) {
         Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Question not found"));
+                .orElseThrow(() -> new QuestionNotFoundException(questionId));
         LlmModel model = modelRepository.findById(modelId)
-                .orElseThrow(() -> new ResourceNotFoundException("Model not found"));
+                .orElseThrow(() -> new LlmModelNotFoundException(modelId));
 
-        long start = System.currentTimeMillis();
-        String answer = staticProvider.getAnswer(modelId, question); // swap by providerType later
-        long elapsed = System.currentTimeMillis() - start;
+        if (!model.isActive()) {
+            throw new InactiveModelException(modelId);
+        }
 
-        return new AskResponseDto(model.getId(), model.getDisplayName(), answer, elapsed);
+        String answer = staticProvider.getAnswer(model, question);
+
+        return new AskResponseDto(model.getId(), model.getDisplayName(), answer);
     }
 }

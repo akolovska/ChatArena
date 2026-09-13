@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { listQuestions } from "@/api/questions";
+import { listQuestions, type QuestionCategory, type QuestionDifficulty } from "@/api/questions";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,8 +24,8 @@ export const Route = createFileRoute("/_authenticated/questions/")({
 function QuestionsPage() {
   const navigate = useNavigate();
   const { t } = useI18n();
-  const [category, setCategory] = useState<string>("all");
-  const [difficulty, setDifficulty] = useState<string>("all");
+  const [category, setCategory] = useState<QuestionCategory | "all">("all");
+  const [difficulty, setDifficulty] = useState<QuestionDifficulty | "all">("all");
   const [search, setSearch] = useState("");
 
   const query = useQuery({
@@ -38,33 +38,27 @@ function QuestionsPage() {
   });
 
   const categories = useMemo(() => {
-    const set = new Set<string>();
-    query.data?.forEach((q) => q.category && set.add(q.category));
+    const set = new Set<QuestionCategory>();
+    query.data?.forEach((q) => set.add(q.category));
     return Array.from(set);
   }, [query.data]);
 
   const difficulties = useMemo(() => {
-    const set = new Set<string>();
-    query.data?.forEach((q) => q.difficulty && set.add(q.difficulty));
+    const set = new Set<QuestionDifficulty>();
+    query.data?.forEach((q) => set.add(q.difficulty));
     return Array.from(set);
   }, [query.data]);
 
   const filtered = useMemo(() => {
     const s = search.trim().toLowerCase();
-    return (query.data ?? []).filter(
-      (q) => !s || q.text.toLowerCase().includes(s),
-    );
+    return (query.data ?? []).filter((q) => !s || q.text.toLowerCase().includes(s));
   }, [query.data, search]);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {t("questions.title")}
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {t("questions.subtitle")}
-        </p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("questions.title")}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{t("questions.subtitle")}</p>
       </div>
 
       <Card className="p-4 flex flex-wrap gap-3">
@@ -77,7 +71,7 @@ function QuestionsPage() {
             className="pl-9"
           />
         </div>
-        <Select value={category} onValueChange={setCategory}>
+        <Select value={category} onValueChange={(v) => setCategory(v as QuestionCategory | "all")}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder={t("questions.category")} />
           </SelectTrigger>
@@ -90,7 +84,10 @@ function QuestionsPage() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={difficulty} onValueChange={setDifficulty}>
+        <Select
+          value={difficulty}
+          onValueChange={(v) => setDifficulty(v as QuestionDifficulty | "all")}
+        >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder={t("questions.difficulty")} />
           </SelectTrigger>
@@ -107,13 +104,9 @@ function QuestionsPage() {
 
       <div className="space-y-2">
         {query.isLoading &&
-          Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-16 w-full" />
-          ))}
+          Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
         {!query.isLoading && filtered.length === 0 && (
-          <Card className="p-8 text-center text-muted-foreground">
-            {t("questions.empty")}
-          </Card>
+          <Card className="p-8 text-center text-muted-foreground">{t("questions.empty")}</Card>
         )}
         {filtered.map((q) => (
           <Card
@@ -130,12 +123,8 @@ function QuestionsPage() {
               <p className="text-sm leading-relaxed flex-1">{q.text}</p>
               <div className="flex flex-col items-end gap-2 shrink-0">
                 <div className="flex flex-wrap gap-1 justify-end">
-                  {q.category && (
-                    <Badge variant="secondary">{q.category}</Badge>
-                  )}
-                  {q.difficulty && (
-                    <Badge variant="outline">{q.difficulty}</Badge>
-                  )}
+                  <Badge variant="secondary">{q.category}</Badge>
+                  <Badge variant="outline">{q.difficulty}</Badge>
                 </div>
                 <Button
                   size="sm"

@@ -15,7 +15,7 @@ public class JwtConstants {
         SECRET_KEY = secretKey;
     }
 
-    @Value("${jwt.expiration}")
+    @Value("${jwt.expiration.ms}")
     public void setExpirationTime(Long expirationTime) {
         EXPIRATION_TIME = expirationTime;
     }

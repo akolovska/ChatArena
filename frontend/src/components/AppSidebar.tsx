@@ -1,13 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import {
-  MessageSquare,
-  ListChecks,
-  History,
-  Cpu,
-  Users,
-  UserCircle,
-  LogOut,
-} from "lucide-react";
+import { MessageSquare, ListChecks, History, Cpu, Users, UserCircle, LogOut } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -32,17 +24,27 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
-  { title: "Разговор", url: "/ask", icon: MessageSquare, roles: ["USER", "EVALUATOR", "ADMIN"] },
-  { title: "Прашања", url: "/questions", icon: ListChecks, roles: ["USER", "EVALUATOR", "ADMIN"] },
-  { title: "Историја", url: "/history", icon: History, roles: ["EVALUATOR", "ADMIN"] },
-  { title: "Модели", url: "/admin/models", icon: Cpu, roles: ["ADMIN"] },
-  { title: "Корисници", url: "/admin/users", icon: Users, roles: ["ADMIN"] },
+  {
+    title: "Разговор",
+    url: "/ask",
+    icon: MessageSquare,
+    roles: ["ROLE_USER", "ROLE_EVALUATOR", "ROLE_ADMIN"],
+  },
+  {
+    title: "Прашања",
+    url: "/questions",
+    icon: ListChecks,
+    roles: ["ROLE_USER", "ROLE_EVALUATOR", "ROLE_ADMIN"],
+  },
+  { title: "Историја", url: "/history", icon: History, roles: ["ROLE_EVALUATOR", "ROLE_ADMIN"] },
+  { title: "Модели", url: "/admin/models", icon: Cpu, roles: ["ROLE_ADMIN"] },
+  { title: "Корисници", url: "/admin/users", icon: Users, roles: ["ROLE_ADMIN"] },
 ];
 
 const ROLE_LABEL: Record<Role, string> = {
-  USER: "Корисник",
-  EVALUATOR: "Евалуатор",
-  ADMIN: "Администратор",
+  ROLE_USER: "Корисник",
+  ROLE_EVALUATOR: "Евалуатор",
+  ROLE_ADMIN: "Администратор",
 };
 
 export function AppSidebar() {
@@ -59,12 +61,8 @@ export function AppSidebar() {
             MK
           </div>
           <div className="flex flex-col leading-tight group-data-[collapsible=icon]:hidden">
-            <span className="text-sm font-semibold tracking-tight">
-              MK LLM Arena
-            </span>
-            <span className="text-xs text-muted-foreground">
-              Македонска евалуација
-            </span>
+            <span className="text-sm font-semibold tracking-tight">MK LLM Arena</span>
+            <span className="text-xs text-muted-foreground">Македонска евалуација</span>
           </div>
         </Link>
       </SidebarHeader>
@@ -75,15 +73,10 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => {
-                const active =
-                  pathname === item.url || pathname.startsWith(item.url + "/");
+                const active = pathname === item.url || pathname.startsWith(item.url + "/");
                 return (
                   <SidebarMenuItem key={item.url}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={active}
-                      tooltip={item.title}
-                    >
+                    <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
                       <Link to={item.url} className="flex items-center gap-2">
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
@@ -104,9 +97,7 @@ export function AppSidebar() {
               <Link to="/profile" className="flex items-center gap-2">
                 <UserCircle className="h-4 w-4" />
                 <div className="flex flex-col leading-tight group-data-[collapsible=icon]:hidden">
-                  <span className="text-sm font-medium">
-                    {auth?.username ?? "—"}
-                  </span>
+                  <span className="text-sm font-medium">{auth?.username ?? "—"}</span>
                   <span className="text-xs text-muted-foreground">
                     {role ? ROLE_LABEL[role] : ""}
                   </span>
@@ -122,9 +113,7 @@ export function AppSidebar() {
           className="justify-start gap-2 group-data-[collapsible=icon]:justify-center"
         >
           <LogOut className="h-4 w-4" />
-          <span className="group-data-[collapsible=icon]:hidden">
-            Одјави се
-          </span>
+          <span className="group-data-[collapsible=icon]:hidden">Одјави се</span>
         </Button>
       </SidebarFooter>
     </Sidebar>

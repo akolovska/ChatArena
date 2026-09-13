@@ -5,8 +5,10 @@ import mk.ukim.finki.backend.model.dto.LoginUserRequestDto;
 import mk.ukim.finki.backend.model.dto.LoginUserResponseDto;
 import mk.ukim.finki.backend.model.dto.RegisterUserRequestDto;
 import mk.ukim.finki.backend.model.dto.RegisterUserResponseDto;
+import mk.ukim.finki.backend.model.enums.Role;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface IUserService extends UserDetailsService {
@@ -15,4 +17,6 @@ public interface IUserService extends UserDetailsService {
     Optional<RegisterUserResponseDto> register(RegisterUserRequestDto registerUserRequestDto);
 
     Optional<LoginUserResponseDto> login(LoginUserRequestDto loginUserRequestDto);
+    List<RegisterUserResponseDto> findAll();
+    RegisterUserResponseDto updateUserRole(Long id, Role role);
 }

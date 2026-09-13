@@ -32,7 +32,4 @@ public class Evaluation extends BaseAuditableEntity{
 
     private String evaluatorName;
 
-    private Instant createdAt = Instant.now();
-
-    // getters/setters
 }
