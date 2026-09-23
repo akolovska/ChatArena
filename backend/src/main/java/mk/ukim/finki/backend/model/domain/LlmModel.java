@@ -19,8 +19,8 @@ public class LlmModel extends BaseAuditableEntity{
 
     private boolean active = true;
 
-    private String providerType; // "static-json", "openai", "anthropic", "custom-http"
+    private String providerType;
 
     @Column(columnDefinition = "TEXT")
-    private String configJson;   // store config map as JSON string
+    private String configJson;
 }

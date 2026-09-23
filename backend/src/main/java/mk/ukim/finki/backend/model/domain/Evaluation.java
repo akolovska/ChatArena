@@ -5,14 +5,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "evaluations")
-public class Evaluation extends BaseAuditableEntity{
+public class Evaluation extends BaseAuditableEntity {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "question_id")
@@ -22,14 +23,11 @@ public class Evaluation extends BaseAuditableEntity{
     @JoinColumn(name = "model_id")
     private LlmModel model;
 
-    private int fluency;
-    private int accuracy;
-    private int relevance;
-    private int grammar;
-
     @Column(columnDefinition = "TEXT")
     private String comment;
 
     private String evaluatorName;
 
+    @OneToMany(mappedBy = "evaluation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EvaluationMetric> metrics = new ArrayList<>();
 }

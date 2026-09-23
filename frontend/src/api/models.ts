@@ -14,14 +14,6 @@ export function listModels(params?: { activeOnly?: boolean }) {
   );
 }
 
-export function createModel(input: {
-  displayName: string;
-  providerType: string;
-  config: Record<string, unknown>;
-}) {
-  return apiFetch<LlmModel>("/models", { method: "POST", body: input });
-}
-
 export function updateModel(id: number, patch: Partial<Omit<LlmModel, "id">>) {
   return apiFetch<LlmModel>(`/models/${id}`, { method: "PUT", body: patch });
 }

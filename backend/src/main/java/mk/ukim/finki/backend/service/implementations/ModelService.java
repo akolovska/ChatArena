@@ -26,7 +26,7 @@ public class ModelService implements IModelService {
     }
 
     @Override
-    public LlmModel getEntityOrThrow(Long id) {
+    public LlmModel getModelOrThrow(Long id) {
         return llmModelRepository.findById(id)
                 .orElseThrow(() -> new LlmModelNotFoundException(id));
     }
@@ -34,19 +34,6 @@ public class ModelService implements IModelService {
     @Override
     public java.util.List<LlmModelDto> findAll() {
         return llmModelRepository.findAll().stream().map(this::toDto).toList();
-    }
-
-    @Override
-    @Transactional
-    public LlmModelDto create(LlmModelDto dto) {
-        LlmModel model = new LlmModel();
-        model.setDisplayName(dto.displayName());
-        model.setProviderType(dto.providerType());
-        model.setActive(dto.active());
-        model.setConfigJson(writeConfig(dto.config()));
-
-        llmModelRepository.save(model);
-        return toDto(model);
     }
 
     @Override

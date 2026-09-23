@@ -37,6 +37,8 @@ const translations: Record<Lang, Dict> = {
     "history.empty": "Сè уште нема евалуации.",
     "history.question": "Прашање",
 
+    "models.providerOpenRouter": "OpenRouter",
+
     // home
     "home.badge": "MK LLM Arena",
     "home.welcome": "Добредојдовте",
@@ -162,6 +164,8 @@ const translations: Record<Lang, Dict> = {
     "role.ROLE_EVALUATOR": "Evaluator",
     "role.ROLE_ADMIN": "Administrator",
     "lang.switch": "Language",
+
+    "models.providerOpenRouter": "OpenRouter",
 
     "history.title": "Evaluation history",
     "history.subtitle": "All evaluations across every question, newest first.",
