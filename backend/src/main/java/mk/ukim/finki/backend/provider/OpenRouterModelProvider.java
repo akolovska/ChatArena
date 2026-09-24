@@ -29,7 +29,7 @@ public class OpenRouterModelProvider implements ModelProvider {
 
     public OpenRouterModelProvider(@Value("${openrouter.base-url}") String baseUrl,
                                    ObjectMapper objectMapper) {
-        ClientHttpRequestFactorySettings settings = ClientHttpRequestFactorySettings.DEFAULTS
+        ClientHttpRequestFactorySettings settings = ClientHttpRequestFactorySettings.defaults()
                 .withConnectTimeout(Duration.ofSeconds(10))
                 .withReadTimeout(Duration.ofSeconds(30));
 
@@ -38,26 +38,25 @@ public class OpenRouterModelProvider implements ModelProvider {
                 .requestFactory(ClientHttpRequestFactoryBuilder.detect().build(settings))
                 .build();
         this.objectMapper = objectMapper;
-
-//        ArrayNode messages = requestBody.putArray("messages");
-//
-//        ObjectNode systemMessage = messages.addObject();
-//        systemMessage.put("role", "system");
-//        systemMessage.put("content", "You are a helpful assistant. Always respond in Macedonian language (македонски јазик), using proper Cyrillic script and correct grammar.");
-//
-//        ObjectNode userMessage = messages.addObject();
-//        userMessage.put("role", "user");
-//        userMessage.put("content", question.getText());
     }
 
     @Override
     public String getAnswer(LlmModel model, Question question) {
+        System.out.println("OpenRouter API key length: " + (apiKey == null ? "NULL" : apiKey.length()));
         String openRouterModel = extractModelName(model.getConfigJson());
 
         ObjectNode requestBody = objectMapper.createObjectNode();
         requestBody.put("model", openRouterModel);
 
         ArrayNode messages = requestBody.putArray("messages");
+        ObjectNode systemMessage = messages.addObject();
+        systemMessage.put("role", "system");
+        systemMessage.put(
+                "content",
+                "You are a helpful assistant. Always respond in Macedonian language " +
+                        "(македонски јазик), using proper Cyrillic script and correct grammar."
+        );
+
         ObjectNode userMessage = messages.addObject();
         userMessage.put("role", "user");
         userMessage.put("content", question.getText());

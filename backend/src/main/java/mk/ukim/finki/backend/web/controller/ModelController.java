@@ -29,8 +29,8 @@ public class ModelController {
         return ResponseEntity.ok(modelService.update(id, dto));
     }
 
-    @GetMapping("/models/leaderboard")
-    public List<LeaderboardEntryDto> leaderboard() {
-        return leaderboardService.getLeaderboard();
-    }
+//    @GetMapping("/models/leaderboard")
+//    public List<LeaderboardEntryDto> leaderboard() {
+//        return leaderboardService.getLeaderboard();
+//    }
 }

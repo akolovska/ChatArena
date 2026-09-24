@@ -10,32 +10,23 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Loader2, ClipboardCheck, Pencil } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useI18n } from "@/lib/i18n";
+import { listMetrics } from "@/api/evaluations";
 import {
-  submitEvaluation,
-  updateEvaluation,
-  listMetrics,
-  type Evaluation,
-  type EvaluationScores,
-} from "@/api/evaluations";
+  submitModelEvaluation,
+  updateModelEvaluation,
+  type ModelEvaluation,
+  type ModelEvaluationScores,
+} from "@/api/models";
 
 interface Props {
-  questionId: number;
   modelId: number;
   modelName: string;
-  /** Provide to render in edit mode (PUT instead of POST). */
-  initial?: Evaluation;
+  initial?: ModelEvaluation;
   onSaved?: () => void;
   onCancel?: () => void;
 }
 
-export function EvaluationPanel({
-  questionId,
-  modelId,
-  modelName,
-  initial,
-  onSaved,
-  onCancel,
-}: Props) {
+export function ModelEvaluationPanel({ modelId, modelName, initial, onSaved, onCancel }: Props) {
   const { auth } = useAuth();
   const { t, lang } = useI18n();
   const queryClient = useQueryClient();
@@ -44,20 +35,21 @@ export function EvaluationPanel({
   const metricsQuery = useQuery({
     queryKey: ["metrics"],
     queryFn: listMetrics,
-    staleTime: 5 * 60 * 1000, // metric list rarely changes; avoid refetching on every mount
+    staleTime: 5 * 60 * 1000,
   });
 
-  const [scores, setScores] = useState<EvaluationScores>(initial?.scores ?? {});
+  const modelMetrics = (metricsQuery.data ?? []).filter((m) => m.scope === "MODEL");
+
+  const [scores, setScores] = useState<ModelEvaluationScores>(initial?.scores ?? {});
   const [comment, setComment] = useState(initial?.comment ?? "");
   const [evaluatorName] = useState(initial?.evaluatorName ?? auth?.username ?? "");
 
-  // Once metric definitions load, default any metric not already scored (new evaluation) to 3.
   useEffect(() => {
-    if (!metricsQuery.data) return;
+    if (modelMetrics.length === 0) return;
     setScores((prev) => {
       const next = { ...prev };
       let changed = false;
-      for (const m of metricsQuery.data) {
+      for (const m of modelMetrics) {
         if (!(m.key in next)) {
           next[m.key] = 3;
           changed = true;
@@ -69,25 +61,19 @@ export function EvaluationPanel({
 
   const mutation = useMutation({
     mutationFn: () => {
-      const payload = {
-        questionId,
-        modelId,
-        scores,
-        comment,
-        evaluatorName,
-      };
-      return isEdit ? updateEvaluation(initial!.id, payload) : submitEvaluation(payload);
+      const payload = { scores, comment, evaluatorName };
+      return isEdit
+        ? updateModelEvaluation(initial!.id, payload)
+        : submitModelEvaluation(modelId, payload);
     },
     onSuccess: () => {
       toast.success(isEdit ? t("eval.updatedToast") : t("eval.savedToast"));
-      queryClient.invalidateQueries({ queryKey: ["evaluations"] });
+      queryClient.invalidateQueries({ queryKey: ["modelEvaluations", modelId] });
       if (!isEdit) setComment("");
       onSaved?.();
     },
     onError: (err) => toast.error(err instanceof Error ? err.message : t("ask.error")),
   });
-
-  const metrics = metricsQuery.data ?? [];
 
   return (
     <Card className="p-4 space-y-4 border-primary/20">
@@ -98,7 +84,7 @@ export function EvaluationPanel({
           <ClipboardCheck className="h-4 w-4 text-primary" />
         )}
         <h3 className="font-semibold text-sm">
-          {isEdit ? t("eval.editTitle") : t("eval.title")} —{" "}
+          {isEdit ? t("eval.editTitle") : t("models.evaluateModel")} —{" "}
           <span className="text-muted-foreground">{modelName}</span>
         </h3>
       </div>
@@ -111,7 +97,7 @@ export function EvaluationPanel({
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
-          {metrics.map((m) => {
+          {modelMetrics.map((m) => {
             const label = lang === "en" ? m.displayNameEn : m.displayNameMk;
             const value = scores[m.key] ?? 3;
             return (
@@ -134,11 +120,11 @@ export function EvaluationPanel({
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="comment" className="text-xs font-medium">
+        <Label htmlFor="model-eval-comment" className="text-xs font-medium">
           {t("eval.comment")}
         </Label>
         <Textarea
-          id="comment"
+          id="model-eval-comment"
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           rows={2}

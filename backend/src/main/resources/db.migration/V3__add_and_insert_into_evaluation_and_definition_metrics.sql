@@ -31,13 +31,4 @@ CREATE TABLE evaluation_metrics (
 
 CREATE INDEX idx_evaluation_metrics_evaluation_id ON evaluation_metrics(evaluation_id);
 CREATE INDEX idx_evaluation_metrics_metric_key ON evaluation_metrics(metric_key);
-CREATE INDEX idx_evaluations_model_id ON evaluations(model_id);
-
-ALTER TABLE evaluations DROP CONSTRAINT IF EXISTS chk_evaluations_fluency;
-ALTER TABLE evaluations DROP CONSTRAINT IF EXISTS chk_evaluations_accuracy;
-ALTER TABLE evaluations DROP CONSTRAINT IF EXISTS chk_evaluations_relevance;
-ALTER TABLE evaluations DROP CONSTRAINT IF EXISTS chk_evaluations_grammar;
-ALTER TABLE evaluations DROP COLUMN IF EXISTS fluency;
-ALTER TABLE evaluations DROP COLUMN IF EXISTS accuracy;
-ALTER TABLE evaluations DROP COLUMN IF EXISTS relevance;
-ALTER TABLE evaluations DROP COLUMN IF EXISTS grammar;
+-- CREATE INDEX idx_evaluations_model_id ON evaluations(model_id);

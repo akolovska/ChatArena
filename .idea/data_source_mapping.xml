@@ -3,5 +3,7 @@
   <component name="DataSourcePerFileMappings">
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db.migration/V1__create_models_tables.sql" value="7d51f9ce-44e6-4f7c-8928-8a46d7e8a401" />
     <file url="file://$PROJECT_DIR$/backend/src/main/resources/db.migration/V2__insert_models_data.sql" value="7d51f9ce-44e6-4f7c-8928-8a46d7e8a401" />
+    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db.migration/V3__add_and_insert_into_evaluation_and_definition_metrics.sql" value="7d51f9ce-44e6-4f7c-8928-8a46d7e8a401" />
+    <file url="file://$PROJECT_DIR$/backend/src/main/resources/db.migration/V4__create_and_add_model_evaluations.sql" value="7d51f9ce-44e6-4f7c-8928-8a46d7e8a401" />
   </component>
 </project>

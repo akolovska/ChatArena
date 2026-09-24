@@ -1,5 +1,6 @@
 package mk.ukim.finki.backend.web.handler;
 
+import mk.ukim.finki.backend.model.exceptions.ModelProviderException;
 import mk.ukim.finki.backend.model.exceptions.ResourceNotFoundException;
 import mk.ukim.finki.backend.web.dto.ErrorResponse;
 import org.apache.coyote.BadRequestException;
@@ -42,5 +43,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
         return ResponseEntity.internalServerError().body(new ErrorResponse("Something went wrong"));
+    }
+    @ExceptionHandler(ModelProviderException.class)
+    public ResponseEntity<ErrorResponse> ModelProviderExceptionHandler(ModelProviderException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(new ErrorResponse(ex.getMessage()));
     }
 }

@@ -23,7 +23,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { listQuestions } from "@/api/questions";
-import { listEvaluations, type Evaluation } from "@/api/evaluations";
+import {
+  listEvaluations,
+  listMetrics,
+  type Evaluation,
+  type MetricDefinition,
+} from "@/api/evaluations";
 import { listModels } from "@/api/models";
 import { ask, type AskResponse } from "@/api/ask";
 import { EvaluationPanel } from "@/components/EvaluationPanel";
@@ -54,6 +59,12 @@ function QuestionDetailPage() {
   const evalQuery = useQuery({
     queryKey: ["evaluations", numericQuestionId],
     queryFn: () => listEvaluations({ questionId: numericQuestionId }),
+  });
+
+  const metricsQuery = useQuery({
+    queryKey: ["metrics"],
+    queryFn: listMetrics,
+    staleTime: 5 * 60 * 1000,
   });
 
   return (
@@ -144,6 +155,8 @@ function QuestionDetailPage() {
                 canEdit={canEdit}
                 onEdit={() => setEditingId(ev.id)}
                 locale={lang === "en" ? "en-US" : "mk-MK"}
+                metrics={metricsQuery.data ?? []}
+                lang={lang}
                 t={t}
               />
             ),
@@ -271,12 +284,16 @@ function EvaluationCard({
   canEdit,
   onEdit,
   locale,
+  metrics,
+  lang,
   t,
 }: {
   evaluation: Evaluation;
   canEdit: boolean;
   onEdit: () => void;
   locale: string;
+  metrics: MetricDefinition[];
+  lang: string;
   t: (k: string) => string;
 }) {
   return (
@@ -317,10 +334,11 @@ function EvaluationCard({
         </div>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        <ScoreCell label={t("eval.fluency")} value={ev.scores.fluency} />
-        <ScoreCell label={t("eval.accuracy")} value={ev.scores.accuracy} />
-        <ScoreCell label={t("eval.relevance")} value={ev.scores.relevance} />
-        <ScoreCell label={t("eval.grammar")} value={ev.scores.grammar} />
+        {Object.entries(ev.scores).map(([key, value]) => {
+          const def = metrics.find((m) => m.key === key);
+          const label = def ? (lang === "en" ? def.displayNameEn : def.displayNameMk) : key;
+          return <ScoreCell key={key} label={label} value={value} />;
+        })}
       </div>
       {ev.comment && (
         <p className="text-sm text-muted-foreground border-l-2 border-primary/40 pl-3">

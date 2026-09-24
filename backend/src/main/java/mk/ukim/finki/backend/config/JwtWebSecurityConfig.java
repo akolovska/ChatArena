@@ -79,6 +79,8 @@ public class JwtWebSecurityConfig {
                         .requestMatchers("/user/me").authenticated()
                         .requestMatchers(HttpMethod.GET, "/questions/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/models/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/models/*/evaluations").hasAnyRole("EVALUATOR", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/models/evaluations/**").hasAnyRole("EVALUATOR", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/models/**").hasRole("ADMIN")
                         .requestMatchers("/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/ask").authenticated()

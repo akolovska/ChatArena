@@ -15,6 +15,7 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,9 +30,7 @@ public class EvaluationService implements IEvaluationService {
     private final EvaluationMetricRepository evaluationMetricRepository;
     private final MetricDefinitionRepository metricDefinitionRepository;
 
-    public EvaluationService(EvaluationRepository evaluationRepository,
-                             QuestionRepository questionRepository,
-                             LlmModelRepository llmModelRepository, EvaluationMetricRepository evaluationMetricRepository, MetricDefinitionRepository metricDefinitionRepository) {
+    public EvaluationService(EvaluationRepository evaluationRepository, QuestionRepository questionRepository, LlmModelRepository llmModelRepository, EvaluationMetricRepository evaluationMetricRepository, MetricDefinitionRepository metricDefinitionRepository) {
         this.evaluationRepository = evaluationRepository;
         this.questionRepository = questionRepository;
         this.llmModelRepository = llmModelRepository;
@@ -42,13 +41,10 @@ public class EvaluationService implements IEvaluationService {
     @Override
     @Transactional
     public EvaluationResponseDto create(EvaluationRequestDto request, String evaluatorUsername) throws BadRequestException {
-        Question question = questionRepository.findById(request.questionId())
-                .orElseThrow(() -> new QuestionNotFoundException(request.questionId()));
-        LlmModel model = llmModelRepository.findById(request.modelId())
-                .orElseThrow(() -> new LlmModelNotFoundException(request.modelId()));
+        Question question = questionRepository.findById(request.questionId()).orElseThrow(() -> new QuestionNotFoundException(request.questionId()));
+        LlmModel model = llmModelRepository.findById(request.modelId()).orElseThrow(() -> new LlmModelNotFoundException(request.modelId()));
 
-        Set<String> validKeys = metricDefinitionRepository.findByActiveTrueOrderBySortOrderAsc()
-                .stream().map(MetricDefinition::getMetricKey).collect(Collectors.toSet());
+        Set<String> validKeys = metricDefinitionRepository.findByActiveTrueOrderBySortOrderAsc().stream().map(MetricDefinition::getMetricKey).collect(Collectors.toSet());
 
         validateScores(request.scores(), validKeys);
 
@@ -67,19 +63,16 @@ public class EvaluationService implements IEvaluationService {
     @Override
     @Transactional
     public EvaluationResponseDto update(Long id, EvaluationRequestDto request) throws BadRequestException {
-        Evaluation evaluation = evaluationRepository.findById(id)
-                .orElseThrow(() -> new EvaluationNotFoundException(id));
+        Evaluation evaluation = evaluationRepository.findById(id).orElseThrow(() -> new EvaluationNotFoundException(id));
 
-        Set<String> validKeys = metricDefinitionRepository.findByActiveTrueOrderBySortOrderAsc()
-                .stream().map(MetricDefinition::getMetricKey).collect(Collectors.toSet());
+        Set<String> validKeys = metricDefinitionRepository.findByActiveTrueOrderBySortOrderAsc().stream().map(MetricDefinition::getMetricKey).collect(Collectors.toSet());
         validateScores(request.scores(), validKeys);
 
         evaluation.setComment(request.comment());
-        evaluation.getMetrics().clear(); // orphanRemoval handles the delete
-        evaluationRepository.save(evaluation);
+        evaluation.getMetrics().clear();
+        evaluationRepository.saveAndFlush(evaluation); // same fix here
 
         attachMetrics(evaluation, request.scores());
-
         return toDto(evaluation);
     }
 
@@ -112,32 +105,31 @@ public class EvaluationService implements IEvaluationService {
 
     @Override
     public EvaluationResponseDto findById(Long id) {
-        return toDto(evaluationRepository.findById(id)
-                .orElseThrow(() -> new EvaluationNotFoundException(id)));
+        return toDto(evaluationRepository.findById(id).orElseThrow(() -> new EvaluationNotFoundException(id)));
     }
 
     @Override
     public List<EvaluationResponseDto> findAll(Long questionId) {
-        List<Evaluation> evaluations = questionId != null
-                ? evaluationRepository.findByQuestionId(questionId)
-                : evaluationRepository.findAll();
+        List<Evaluation> evaluations = questionId != null ? evaluationRepository.findByQuestionId(questionId) : evaluationRepository.findAll();
         return evaluations.stream().map(this::toDto).toList();
     }
 
     public List<MetricDefinitionDto> getActiveMetrics() {
-        return metricDefinitionRepository.findByActiveTrueOrderBySortOrderAsc().stream()
-                .map(m -> new MetricDefinitionDto(m.getMetricKey(), m.getDisplayNameMk(), m.getSortOrder()))
-                // NOTE: swap displayNameMk/displayNameEn based on locale if you want server-side i18n;
-                // simpler to send both and let the frontend pick — see note below.
-                .toList();
+        return metricDefinitionRepository.findByActiveTrueOrderBySortOrderAsc().stream().map(m -> new MetricDefinitionDto(m.getMetricKey(), m.getDisplayNameMk(), m.getDisplayNameEn(), m.getSortOrder(), m.getScope())).toList();
     }
 
     private EvaluationResponseDto toDto(Evaluation e) {
-        Map<String, Integer> scores = e.getMetrics().stream()
+        Map<String, Integer> rawScores = e.getMetrics().stream()
                 .collect(Collectors.toMap(EvaluationMetric::getMetricKey, EvaluationMetric::getValue));
+
+        Map<String, Integer> orderedScores = new LinkedHashMap<>();
+        metricDefinitionRepository.findByActiveTrueOrderBySortOrderAsc().stream()
+                .filter(m -> rawScores.containsKey(m.getMetricKey()))
+                .forEach(m -> orderedScores.put(m.getMetricKey(), rawScores.get(m.getMetricKey())));
+
         return new EvaluationResponseDto(
                 e.getId(), e.getQuestion().getId(), e.getModel().getId(),
-                scores, e.getComment(), e.getEvaluatorName(),
+                orderedScores, e.getComment(), e.getEvaluatorName(),
                 e.getModel().getDisplayName(), e.getCreatedAt()
         );
     }

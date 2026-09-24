@@ -8,7 +8,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 const ROLE_RULES: { prefix: string; roles: Role[] }[] = [
-  { prefix: "/admin", roles: ["ROLE_ADMIN"] },
+  { prefix: "/admin/models", roles: ["ROLE_EVALUATOR", "ROLE_ADMIN"] },
+  { prefix: "/admin/users", roles: ["ROLE_ADMIN"] },
   { prefix: "/history", roles: ["ROLE_EVALUATOR", "ROLE_ADMIN"] },
 ];
 

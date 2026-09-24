@@ -1,2 +1,0 @@
-INSERT INTO llm_models (display_name, active, provider_type, config_json, created_at, updated_at)
-VALUES ('GPT-4o mini (OpenRouter)', true, 'openrouter', '{"model":"openai/gpt-4o-mini"}', now(), now());

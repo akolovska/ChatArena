@@ -16,7 +16,7 @@ import mk.ukim.finki.backend.service.IAnswerService;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AnswerService {
+public class AnswerService implements IAnswerService{
 
     private final QuestionRepository questionRepository;
     private final LlmModelRepository llmModelRepository;
@@ -30,6 +30,7 @@ public class AnswerService {
         this.providerRegistry = providerRegistry;
     }
 
+    @Override
     public AskResponseDto getAnswer(Long questionId, Long modelId) {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new QuestionNotFoundException(questionId));

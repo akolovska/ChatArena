@@ -19,4 +19,7 @@ public class MetricDefinition {
     private String displayNameEn;
     private Integer sortOrder;
     private boolean active = true;
+
+    @Column(nullable = false)
+    private String scope; // "RESPONSE" or "MODEL"
 }

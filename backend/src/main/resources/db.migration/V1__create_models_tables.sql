@@ -44,10 +44,6 @@ CREATE TABLE evaluations (
                              id              BIGSERIAL PRIMARY KEY,
                              question_id     BIGINT       NOT NULL,
                              model_id        BIGINT       NOT NULL,
-                             fluency         INTEGER      NOT NULL,
-                             accuracy        INTEGER      NOT NULL,
-                             relevance       INTEGER      NOT NULL,
-                             grammar         INTEGER      NOT NULL,
                              comment         TEXT,
                              evaluator_name  VARCHAR(255),
 
@@ -57,12 +53,7 @@ CREATE TABLE evaluations (
                              CONSTRAINT fk_evaluations_question
                                  FOREIGN KEY (question_id) REFERENCES questions (id) ON DELETE CASCADE,
                              CONSTRAINT fk_evaluations_model
-                                 FOREIGN KEY (model_id) REFERENCES llm_models (id) ON DELETE CASCADE,
-
-                             CONSTRAINT chk_evaluations_fluency   CHECK (fluency   BETWEEN 1 AND 5),
-                             CONSTRAINT chk_evaluations_accuracy  CHECK (accuracy  BETWEEN 1 AND 5),
-                             CONSTRAINT chk_evaluations_relevance CHECK (relevance BETWEEN 1 AND 5),
-                             CONSTRAINT chk_evaluations_grammar   CHECK (grammar   BETWEEN 1 AND 5)
+                                 FOREIGN KEY (model_id) REFERENCES llm_models (id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_evaluations_question_id ON evaluations (question_id);

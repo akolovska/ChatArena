@@ -18,5 +18,4 @@ VALUES
     ('Кои настани довеле до создавањето на ВМРО во 1893 година?', 'HISTORY', 'HARD', now(), now());
 
 INSERT INTO llm_models (display_name, active, provider_type, config_json, created_at, updated_at)
-VALUES
-    ('Reference Answers (Static DB)', true, 'static-json', '{}', now(), now());
+VALUES ('GPT-4o mini (OpenRouter)', true, 'openrouter', '{"model":"openai/gpt-4o-mini"}', now(), now());

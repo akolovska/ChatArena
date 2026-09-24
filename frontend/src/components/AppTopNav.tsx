@@ -58,7 +58,7 @@ const NAV: NavItem[] = [
     icon: History,
     roles: ["ROLE_EVALUATOR", "ROLE_ADMIN"],
   },
-  { key: "nav.models", url: "/admin/models", icon: Cpu, roles: ["ROLE_ADMIN"] },
+  { key: "nav.models", url: "/admin/models", icon: Cpu, roles: ["ROLE_EVALUATOR", "ROLE_ADMIN"] },
   { key: "nav.users", url: "/admin/users", icon: Users, roles: ["ROLE_ADMIN"] },
 ];
 

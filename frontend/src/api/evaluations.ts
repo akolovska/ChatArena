@@ -1,10 +1,14 @@
 import { apiFetch } from "./client";
+import { ModelEvaluation, ModelEvaluationInput } from "@/api/models.ts";
 
-export interface EvaluationScores {
-  fluency: number;
-  accuracy: number;
-  relevance: number;
-  grammar: number;
+export type EvaluationScores = Record<string, number>;
+
+export interface MetricDefinition {
+  key: string;
+  displayNameMk: string;
+  displayNameEn: string;
+  sortOrder: number;
+  scope: "RESPONSE" | "MODEL";
 }
 
 export interface Evaluation {
@@ -26,6 +30,10 @@ export interface EvaluationInput {
   evaluatorName: string;
 }
 
+export function listMetrics() {
+  return apiFetch<MetricDefinition[]>("/evaluations/metrics");
+}
+
 export function submitEvaluation(input: EvaluationInput) {
   return apiFetch<Evaluation>("/evaluations", { method: "POST", body: input });
 }
@@ -39,6 +47,12 @@ export function updateEvaluation(id: number, input: EvaluationInput) {
 
 export function getEvaluation(id: number) {
   return apiFetch<Evaluation>(`/evaluations/${id}`);
+}
+export function updateModelEvaluation(id: number, input: ModelEvaluationInput) {
+  return apiFetch<ModelEvaluation>(`/models/evaluations/${id}`, {
+    method: "PUT",
+    body: input,
+  });
 }
 
 export function listEvaluations(params: { questionId?: number }) {

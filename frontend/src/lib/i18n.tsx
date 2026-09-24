@@ -95,6 +95,11 @@ const translations: Record<Lang, Dict> = {
     "eval.savedToast": "Евалуацијата е зачувана",
     "eval.updatedToast": "Евалуацијата е ажурирана",
 
+    "models.evaluate": "Евалуирај",
+    "models.evaluateModel": "Евалуација на модел",
+    "models.addEvaluation": "Додади евалуација на модел",
+    "models.evaluationsCount": "евалуации досега",
+
     // ask
     "ask.title": "Разговор со модел",
     "ask.subtitle": "Изберете модел, поставете прашање на македонски и добијте одговор.",
@@ -147,9 +152,11 @@ const translations: Record<Lang, Dict> = {
     "users.roleUpdated": "Улогата е ажурирана",
 
     "common.loading": "Се вчитува...",
+    "models.noEvaluations": "Сè уште нема евалуации на овој модел.",
   },
 
   en: {
+    "models.noEvaluations": "No evaluations for this model yet.",
     "nav.home": "Home",
     "nav.ask": "Chat",
     "nav.questions": "Questions",
@@ -171,6 +178,11 @@ const translations: Record<Lang, Dict> = {
     "history.subtitle": "All evaluations across every question, newest first.",
     "history.empty": "No evaluations yet.",
     "history.question": "Question",
+
+    "models.evaluate": "Evaluate",
+    "models.evaluateModel": "Model evaluation",
+    "models.addEvaluation": "Add model evaluation",
+    "models.evaluationsCount": "evaluations so far",
 
     "home.badge": "MK LLM Arena",
     "home.welcome": "Welcome",

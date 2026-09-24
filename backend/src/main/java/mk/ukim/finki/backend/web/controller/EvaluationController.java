@@ -1,9 +1,8 @@
 package mk.ukim.finki.backend.web.controller;
 
-import mk.ukim.finki.backend.model.dto.EvaluationRequestDto;
-import mk.ukim.finki.backend.model.dto.EvaluationResponseDto;
-import mk.ukim.finki.backend.model.dto.MetricDefinitionDto;
+import mk.ukim.finki.backend.model.dto.*;
 import mk.ukim.finki.backend.service.IEvaluationService;
+import mk.ukim.finki.backend.service.IModelEvaluationService;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,9 +16,11 @@ import java.util.List;
 public class EvaluationController {
 
     private final IEvaluationService evaluationService;
+    private final IModelEvaluationService modelEvaluationService;
 
-    public EvaluationController(IEvaluationService evaluationService) {
+    public EvaluationController(IEvaluationService evaluationService, IModelEvaluationService modelEvaluationService) {
         this.evaluationService = evaluationService;
+        this.modelEvaluationService = modelEvaluationService;
     }
 
     @PostMapping
@@ -43,8 +44,8 @@ public class EvaluationController {
     public ResponseEntity<List<EvaluationResponseDto>> findAll(@RequestParam(required = false) Long questionId) {
         return ResponseEntity.ok(evaluationService.findAll(questionId));
     }
-    @GetMapping("/evaluations/metrics")
-    public List<MetricDefinitionDto> getMetrics() {
-        return evaluationService.getActiveMetrics();
+    @GetMapping("/metrics")
+    public ResponseEntity<List<MetricDefinitionDto>> getMetrics() {
+        return ResponseEntity.ok(evaluationService.getActiveMetrics());
     }
 }
